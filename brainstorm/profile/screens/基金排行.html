@@ -1,0 +1,279 @@
+<!--
+  WB-APP Screen: 基金排行 (Fund Ranking)
+  A sortable ranking list of funds by category and performance period.
+  Layout: Preview chrome (inner) with an inset search row → category tabs → period pills →
+          column headers → ranked rows
+  Background: #FFFFFF (confirmed via fresh Figma get_screenshot comparison — the whole page below
+  the navbar is plain white, not grey; overridden inline since the shared page-shell default is grey)
+  Note: source header is a dark-blue (#3D60CC) navbar with white icons — the shared iOS chrome
+  now supports this via the --chrome-navbar-bg/--chrome-fg/--chrome-tint variable hooks,
+  overridden in this file's <style> block. The customer-service (客服) icon to the right of the
+  search bar sits outside the rounded search pill in source. The row overlaps the empty
+  inner-navbar title area so the back, search, and support controls share one 44px row.
+-->
+
+<div class="wb-app-page" style="background: var(--wb-app-surface, #FFFFFF);">
+
+  <!-- ===== iOS CHROME (Presentation-only) ===== -->
+  <preview-chrome variant="inner" title=""></preview-chrome>
+
+  <!-- Search is absolutely inset beside the back button in the navbar. -->
+  <div class="wb-fund-searchbar-row wb-fund-ranking-search">
+    <div class="wb-fund-searchbar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="rgba(0,0,0,0.35)" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="rgba(0,0,0,0.35)" stroke-width="2" stroke-linecap="round"/></svg>
+      <span class="wb-fund-searchbar-placeholder">易方达黄金ETF联接A</span>
+      <span class="wb-fund-searchbar-divider"></span>
+      <span class="wb-fund-searchbar-action">搜索</span>
+    </div>
+    <button class="wb-fund-searchbar-trailing" aria-label="客服">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden="true"><path d="M4 13V11C4 6.58172 7.58172 3 12 3C16.4183 3 20 6.58172 20 11V13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><rect x="2.5" y="12" width="4" height="6" rx="2" stroke="currentColor" stroke-width="1.5"/><rect x="17.5" y="12" width="4" height="6" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M20 18.5V19C20 20.1046 19.1046 21 18 21H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+
+  <!-- ===== PAGE BODY ===== -->
+  <div class="wb-app-page-body" style="padding-bottom: 20px;">
+
+    <!-- Category tabs -->
+    <div class="wb-fund-tabs">
+      <span class="wb-fund-tab wb-fund-tab--active">全部</span>
+      <span class="wb-fund-tab">混合</span>
+      <span class="wb-fund-tab">股票</span>
+      <span class="wb-fund-tab">债券</span>
+      <span class="wb-fund-tab">指数</span>
+      <span class="wb-fund-tab">其他</span>
+    </div>
+
+    <!-- Period pills -->
+    <div class="wb-fund-periods">
+      <span class="wb-fund-period">近3月</span>
+      <span class="wb-fund-period">近6月</span>
+      <span class="wb-fund-period wb-fund-period--active">近1年</span>
+      <span class="wb-fund-period">近3年</span>
+      <span class="wb-fund-period">近5年</span>
+    </div>
+
+    <!-- Column headers -->
+    <div class="wb-fund-columns">
+      <span class="wb-fund-col wb-fund-col--name">基金名称</span>
+      <span class="wb-fund-col">涨跌幅<br><span class="wb-fund-col-sub">近1年</span></span>
+      <span class="wb-fund-col">夏普比率<br><span class="wb-fund-col-sub">近1年</span></span>
+      <span class="wb-fund-col">最大<span style="opacity:.6">回撤</span><br><span class="wb-fund-col-sub">今年来</span></span>
+    </div>
+
+    <!-- Ranked rows -->
+    <div class="wb-fund-list">
+
+      <div class="wb-fund-list-row">
+        <div class="wb-fund-list-name">
+          <div class="wb-fund-list-title">景顺长城新兴成长<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#456CE6"/><path d="M8 12.5l2.5 2.5L16 9.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="wb-fund-list-meta">000123 <span class="wb-fund-tag">0申购费</span></div>
+        </div>
+        <span class="wb-fund-list-value wb-fund-gain">+26.35%</span>
+        <span class="wb-fund-list-value">1.47</span>
+        <span class="wb-fund-list-value">16.74%</span>
+      </div>
+
+      <div class="wb-fund-list-row">
+        <div class="wb-fund-list-name">
+          <div class="wb-fund-list-title">易方达亚洲精选<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#456CE6"/><path d="M8 12.5l2.5 2.5L16 9.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="wb-fund-list-meta">000123</div>
+        </div>
+        <span class="wb-fund-list-value wb-fund-gain">+18.62%</span>
+        <span class="wb-fund-list-value">1.46</span>
+        <span class="wb-fund-list-value">36.51%</span>
+      </div>
+
+      <div class="wb-fund-list-row">
+        <div class="wb-fund-list-name">
+          <div class="wb-fund-list-title">鹏华国证半导体芯片…<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#456CE6"/><path d="M8 12.5l2.5 2.5L16 9.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="wb-fund-list-meta">000123</div>
+        </div>
+        <span class="wb-fund-list-value wb-fund-gain">+16.36%</span>
+        <span class="wb-fund-list-value">0.96</span>
+        <span class="wb-fund-list-value">37.82%</span>
+      </div>
+
+      <div class="wb-fund-list-row">
+        <div class="wb-fund-list-name">
+          <div class="wb-fund-list-title">国富新能源汽车链接C<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#456CE6"/><path d="M8 12.5l2.5 2.5L16 9.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="wb-fund-list-meta">000123 <span class="wb-fund-tag">0申购费</span></div>
+        </div>
+        <span class="wb-fund-list-value wb-fund-gain">+12.49%</span>
+        <span class="wb-fund-list-value">0.91</span>
+        <span class="wb-fund-list-value">36.66%</span>
+      </div>
+
+      <div class="wb-fund-list-row">
+        <div class="wb-fund-list-name">
+          <div class="wb-fund-list-title">泰信行业精选灵活配...<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#456CE6"/><path d="M8 12.5l2.5 2.5L16 9.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="wb-fund-list-meta">000123</div>
+        </div>
+        <span class="wb-fund-list-value wb-fund-gain">+12.20%</span>
+        <span class="wb-fund-list-value">0.95</span>
+        <span class="wb-fund-list-value">37.87%</span>
+      </div>
+
+      <div class="wb-fund-list-row">
+        <div class="wb-fund-list-name">
+          <div class="wb-fund-list-title">国泰中证动漫游戏ETF<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#456CE6"/><path d="M8 12.5l2.5 2.5L16 9.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="wb-fund-list-meta">000123</div>
+        </div>
+        <span class="wb-fund-list-value wb-fund-gain">+9.26%</span>
+        <span class="wb-fund-list-value">0.90</span>
+        <span class="wb-fund-list-value">16.59%</span>
+      </div>
+
+      <div class="wb-fund-list-row">
+        <div class="wb-fund-list-name">
+          <div class="wb-fund-list-title">金鹰科技创新股票A<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#456CE6"/><path d="M8 12.5l2.5 2.5L16 9.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="wb-fund-list-meta">000123 <span class="wb-fund-tag">0申购费</span></div>
+        </div>
+        <span class="wb-fund-list-value wb-fund-gain">+8.48%</span>
+        <span class="wb-fund-list-value">1.23</span>
+        <span class="wb-fund-list-value">26.39%</span>
+      </div>
+
+      <div class="wb-fund-list-row wb-fund-list-row--last">
+        <div class="wb-fund-list-name">
+          <div class="wb-fund-list-title">融通中证云计算<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#456CE6"/><path d="M8 12.5l2.5 2.5L16 9.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="wb-fund-list-meta">000123</div>
+        </div>
+        <span class="wb-fund-list-value wb-fund-gain">+5.42%</span>
+        <span class="wb-fund-list-value">0.96</span>
+        <span class="wb-fund-list-value">15.42%</span>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<style>
+  /* Chrome theming: this screen's navbar is dark-blue with white icons in the
+     source design (see top-of-file note) — override the platform chrome's
+     default black-on-white via its CSS variable hooks. */
+  :root {
+    --chrome-navbar-bg: #3D60CC;
+    --chrome-fg: #FFFFFF;
+    --chrome-tint: #FFFFFF;
+  }
+
+  /* Figma node 3004:476: back at x16, search x60/w255, support x331/w28. */
+  .wb-fund-ranking-search {
+    position: absolute;
+    top: 50px;
+    left: 60px;
+    right: 16px;
+    z-index: 11;
+    gap: 16px;
+    margin: 0;
+  }
+  .wb-fund-ranking-search .wb-fund-searchbar {
+    background: rgba(255,255,255,0.12);
+  }
+  .wb-fund-ranking-search .wb-fund-searchbar svg circle,
+  .wb-fund-ranking-search .wb-fund-searchbar svg path {
+    stroke: rgba(255,255,255,0.72);
+  }
+  .wb-fund-ranking-search .wb-fund-searchbar-placeholder {
+    color: rgba(255,255,255,0.72);
+  }
+  .wb-fund-ranking-search .wb-fund-searchbar-divider {
+    background: rgba(255,255,255,0.24);
+  }
+  .wb-fund-ranking-search .wb-fund-searchbar-action,
+  .wb-fund-ranking-search .wb-fund-searchbar-trailing {
+    color: var(--brand-accent-text, #FFFFFF);
+  }
+
+  /* Category tabs */
+  .wb-fund-tabs {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 14px 20px 8px;
+  }
+  .wb-fund-tab {
+    font-size: 14px;
+    color: var(--wb-app-text-secondary, #9DA2B3);
+  }
+  .wb-fund-tab--active {
+    color: var(--wb-app-text-primary, #37456E);
+    font-weight: 600;
+  }
+
+  /* Period pills */
+  .wb-fund-periods {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+  }
+  .wb-fund-period {
+    font-size: 12px;
+    color: var(--wb-app-text-secondary, #9DA2B3);
+    padding: 4px 10px;
+    border-radius: 12px;
+  }
+  .wb-fund-period--active {
+    color: var(--wb-app-theme-500, #456CE6);
+    font-weight: 600;
+    background: var(--brand-selected-bg, #ECF0FC);
+  }
+
+  /* Column headers */
+  .wb-fund-columns {
+    display: grid;
+    grid-template-columns: 162px 85px 85px 85px;
+    align-items: flex-start;
+    box-sizing: border-box;
+    width: 423px;
+    padding: 12px 0 12px 16px;
+    font-size: 12px;
+    color: var(--wb-app-text-secondary, #9DA2B3);
+    line-height: 1.4;
+  }
+  .wb-fund-col { text-align: left; }
+  .wb-fund-col--name { text-align: left; }
+  .wb-fund-col-sub { opacity: 0.7; }
+
+  /* Ranked list */
+  .wb-fund-list { background: var(--wb-app-surface, #FFFFFF); }
+  .wb-fund-list-row {
+    display: grid;
+    grid-template-columns: 162px 85px 85px 85px;
+    align-items: center;
+    box-sizing: border-box;
+    width: 423px;
+    padding: 16px 0 16px 16px;
+    border-bottom: 0.5px solid var(--wb-app-divider, #F0F0F0);
+  }
+  .wb-fund-list-row--last { border-bottom: none; }
+  .wb-fund-list-name { min-width: 0; }
+  .wb-fund-list-title {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 14px;
+    color: var(--wb-app-text-primary, #37456E);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .wb-fund-list-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--wb-app-text-secondary, #9DA2B3);
+  }
+  /* .wb-fund-tag now lives in components.css (shared with 基金tab.html) */
+  .wb-fund-list-value {
+    text-align: left;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--wb-app-text-primary, #37456E);
+  }
+</style>

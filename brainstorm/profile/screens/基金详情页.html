@@ -1,0 +1,774 @@
+<!--
+  WB-APP Screen: 基金详情页 (Fund Detail)
+  Full detail page for a single mutual fund: header stats, NAV/performance charts,
+  drawdown & Sharpe-ratio cards, holdings breakdown, fund manager & company info,
+  trading rules, comments, and a fixed bottom buy bar.
+  Layout: Preview chrome (inner, "产品详情") → blue hero (fund name/tags/quick actions) →
+          floating white stats card → promo cards → performance card stack → holdings →
+          fund profile → trading rules → comments → fixed bottom action bar
+  Background: #F5F5F5
+  Note: source header is a dark-blue (#3D60CC) navbar with white icons, continuing into a
+  blue hero band below it — the shared iOS chrome now supports this via the
+  --chrome-navbar-bg/--chrome-fg/--chrome-tint variable hooks, overridden in this file's
+  <style> block. The trailing "分享" (share) icon is passed via <preview-chrome trailing="...">,
+  a generic slot added to platforms/ios/chrome.html + scripts/serve-preview.cjs (hand-drawn
+  SVG reproduction of the source share-nodes icon — the real asset resisted clean chroma-key
+  extraction from its "-on dark" render, see session notes).
+  Comment-avatar illustrations (generated cartoon avatars) are simplified to flat color
+  circles rather than reconstructed layer-by-layer — noted as a simplification.
+-->
+
+<div class="wb-app-page">
+
+  <!-- ===== iOS CHROME (Presentation-only) ===== -->
+  <preview-chrome variant="inner" title="产品详情" trailing='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden="true"><circle cx="18" cy="5" r="3" stroke="currentColor" stroke-width="1.5"/><circle cx="6" cy="12" r="3" stroke="currentColor" stroke-width="1.5"/><circle cx="18" cy="19" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M8.6 10.5L15.4 6.5M8.6 13.5L15.4 17.5" stroke="currentColor" stroke-width="1.5"/></svg>'></preview-chrome>
+
+  <!-- ===== PAGE BODY ===== -->
+  <div class="wb-app-page-body" style="padding-bottom: 110px;">
+
+    <!-- Blue hero: fund identity + tags + quick actions -->
+    <div class="wb-fd-hero">
+      <div class="wb-fd-hero-tag">502003｜股票型基金｜中等风险</div>
+      <div class="wb-fd-hero-name">易方达中证军工指数(LOF)A</div>
+      <div class="wb-fd-hero-actions">
+        <div class="wb-fd-hero-action">
+          <span class="wb-fd-hero-quick-label"><img src="/profile/design-system/assets/icon-quick-redemption.svg" alt="" class="wb-fd-hero-action-icon" width="10" height="10">快速赎回</span>
+          <span>500万内T+0.5到账</span>
+          <img src="/profile/design-system/assets/chevron-right.svg" alt="" width="9" height="9">
+        </div>
+        <div class="wb-fd-hero-action wb-fd-hero-action--gold">
+          <img src="/profile/design-system/assets/icon-ranking-badge.svg" alt="" class="wb-fd-hero-action-icon" width="10" height="10"><span class="wb-fd-hero-action-gold-text">榜单</span> 今日加仓榜第<b>1</b>名<img src="/profile/design-system/assets/chevron-right.svg" alt="" width="9" height="9">
+        </div>
+      </div>
+      <div class="wb-fd-hero-traits">
+        <span class="wb-fd-hero-badge">涨幅跑赢 93% 同类</span>
+        <span class="wb-fd-hero-badge">今年以来周周正收益</span>
+        <span class="wb-fd-hero-minitag">国防军工</span>
+        <span class="wb-fd-hero-minitag wb-fd-hero-minitag--linked">定投中</span>
+      </div>
+    </div>
+
+    <!-- Floating stats card -->
+    <div class="wb-fd-stats-card">
+      <div class="wb-fd-stat">
+        <span class="wb-fd-stat-value wb-fund-gain">12.92%</span>
+        <span class="wb-fd-stat-label">近一年涨跌幅</span>
+      </div>
+      <div class="wb-fd-stat">
+        <span class="wb-fd-stat-value wb-fund-gain" style="font-size: 16px;">4.20%</span>
+        <span class="wb-fd-stat-label">近三年涨跌幅</span>
+      </div>
+      <div class="wb-fd-stat">
+        <span class="wb-fd-stat-value wb-fund-gain" style="font-size: 16px;">4.20%</span>
+        <span class="wb-fd-stat-label">日涨跌幅</span>
+      </div>
+      <div class="wb-fd-stat">
+        <span class="wb-fd-stat-value" style="font-size: 16px;">1.4207</span>
+        <span class="wb-fd-stat-label">净值11-24</span>
+      </div>
+    </div>
+
+    <!-- Promo card: learning rewards -->
+    <div class="wb-fd-promo-card">
+      <img class="wb-fd-promo-icon" src="/profile/design-system/assets/icon-learning-badge.png" alt="">
+      <div class="wb-fd-promo-text">
+        <div class="wb-fd-promo-title">财运稳添利</div>
+        <div class="wb-fd-promo-sub">学习知识，每购买1000元送200积分</div>
+      </div>
+      <img src="/profile/design-system/assets/chevron-right.svg" alt="" width="16" height="16">
+    </div>
+
+    <!-- Learn-and-earn banner -->
+    <div class="wb-fd-banner">
+      <img class="wb-fd-banner-icon" src="/profile/design-system/assets/icon-red-envelope.svg" alt="" width="24" height="24">
+      <span class="wb-fd-banner-text">学知识，领5.88元福利券</span>
+      <button class="wb-fd-banner-cta">领取</button>
+    </div>
+
+    <!-- 业绩走势 / 净值走势 card -->
+    <div class="wb-fd-card wb-fd-performance-card">
+      <div class="wb-fd-card-tabs">
+        <span class="wb-fd-card-tab wb-fd-card-tab--active">业绩走势</span>
+        <span class="wb-fd-card-tab">净值走势</span>
+      </div>
+      <div class="wb-fd-chart-legend">
+        <span class="wb-fd-legend-item"><span class="wb-fd-legend-label"><i class="wb-fd-dot" style="background:var(--wb-app-theme-500, #456CE6)"></i>本基金</span><b class="wb-fund-gain">12.92%</b></span>
+        <span class="wb-fd-legend-item"><span class="wb-fd-legend-label"><i class="wb-fd-dot" style="background:var(--wb-app-orange-500, #F99C4B)"></i>沪深300<img src="/profile/design-system/assets/chevron-right.svg" alt="" width="10" height="10" style="transform:rotate(90deg)"></span><b class="wb-fund-gain">15.06%</b></span>
+        <span class="wb-fd-legend-item"><span class="wb-fd-legend-label"><i class="wb-fd-dot" style="background:#C5CBDA"></i>同类平均ⓘ</span><b class="wb-fund-gain">12.09%</b></span>
+      </div>
+      <div class="wb-fd-chart">
+        <div class="wb-fd-chart-yaxis">
+          <span>36.00%</span><span>24.00%</span><span>12.00%</span><span>0.00%</span><span>-12.00%</span>
+        </div>
+        <div class="wb-fd-chart-main">
+          <div class="wb-fd-chart-plot">
+            <div class="wb-fd-chart-gridlines"></div>
+            <img class="wb-fd-chart-area" src="/profile/design-system/assets/chart-nav-area-benchmark.svg" alt="">
+            <img class="wb-fd-chart-area" src="/profile/design-system/assets/chart-nav-area-fund.svg" alt="">
+            <img class="wb-fd-chart-line" src="/profile/design-system/assets/chart-nav-line-benchmark.svg" alt="">
+            <img class="wb-fd-chart-line" src="/profile/design-system/assets/chart-nav-line-fund.svg" alt="">
+            <div class="wb-fd-chart-marker" style="left:38%;">
+              <span class="wb-fd-chart-marker-label">基金经理变更</span>
+            </div>
+          </div>
+          <div class="wb-fd-chart-xaxis">
+            <span>2024-11-22</span><span>2025-05-28</span><span>2025-11-24</span>
+          </div>
+        </div>
+      </div>
+      <div class="wb-fd-chart-periods">
+        <span>近1月</span>
+        <span>近3月</span>
+        <span>近6月</span>
+        <span class="wb-fd-chart-period--active">近1年</span>
+        <span class="wb-fd-chart-period-arrow"><img src="/profile/design-system/assets/chevron-right.svg" alt="" width="10" height="10"></span>
+      </div>
+    </div>
+
+    <!-- 业绩涨幅 / 定投涨幅 card -->
+    <div class="wb-fd-card">
+      <div class="wb-fd-card-tabs">
+        <span class="wb-fd-card-tab wb-fd-card-tab--active">业绩涨幅</span>
+        <span class="wb-fd-card-tab">定投涨幅</span>
+      </div>
+      <div class="wb-fd-pill-row">
+        <span class="wb-fd-pill wb-fd-pill--active">阶段涨幅</span>
+        <span class="wb-fd-pill">日涨幅</span>
+        <span class="wb-fd-pill">季度涨幅</span>
+        <span class="wb-fd-pill">年度涨幅</span>
+      </div>
+      <table class="wb-fd-table">
+        <thead>
+          <tr><th class="wb-fd-table-left">时间</th><th>涨跌幅</th><th>同类平均ⓘ</th><th>同类排行ⓘ</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="wb-fd-table-left">近1周</td>
+            <td class="wb-fund-loss">-0.06%</td>
+            <td class="wb-fund-loss">-3.84%</td>
+            <td><b>41</b><span class="wb-fd-table-dim">/4587</span> <span class="wb-fd-rank-badge wb-fd-rank-badge--great">优秀</span></td>
+          </tr>
+          <tr>
+            <td class="wb-fd-table-left">近1月</td>
+            <td class="wb-fund-loss">-1.31%</td>
+            <td class="wb-fund-loss">-4.63%</td>
+            <td><b>727</b><span class="wb-fd-table-dim">/4531</span> <span class="wb-fd-rank-badge wb-fd-rank-badge--great">优秀</span></td>
+          </tr>
+          <tr>
+            <td class="wb-fd-table-left">近3月</td>
+            <td class="wb-fund-loss">-6.58%</td>
+            <td class="wb-fund-gain">1.42%</td>
+            <td><b>3765</b><span class="wb-fd-table-dim">/4290</span> <span class="wb-fd-rank-badge wb-fd-rank-badge--ok">一般</span></td>
+          </tr>
+          <tr>
+            <td class="wb-fd-table-left">近6月</td>
+            <td class="wb-fund-gain">15.08%</td>
+            <td class="wb-fund-gain">21.25%</td>
+            <td><b>2393</b><span class="wb-fd-table-dim">/3907</span> <span class="wb-fd-rank-badge wb-fd-rank-badge--good">良好</span></td>
+          </tr>
+          <tr>
+            <td class="wb-fd-table-left">近1年</td>
+            <td class="wb-fund-gain">12.92%</td>
+            <td class="wb-fund-gain">22.80%</td>
+            <td><b>2381</b><span class="wb-fd-table-dim">/3191</span> <span class="wb-fd-rank-badge wb-fd-rank-badge--good">良好</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="wb-fd-more">查看更多</div>
+    </div>
+
+    <!-- 抗下跌能力 card -->
+    <div class="wb-fd-card">
+      <div class="wb-fd-card-header-row">
+        <span class="wb-fd-card-title">抗下跌能力</span>
+        <span class="wb-fd-period-select">近1年<img src="/profile/design-system/assets/chevron-right.svg" alt="" width="10" height="10" style="transform:rotate(90deg)"></span>
+      </div>
+      <div class="wb-fd-chart-legend">
+        <span class="wb-fd-legend-item"><i class="wb-fd-dot" style="background:var(--wb-app-loss-500, #12B38A)"></i>最大回撤 <b>14.84%</b>ⓘ<br><span class="wb-fd-legend-sub">超85%同类</span></span>
+        <span class="wb-fd-legend-item"><i class="wb-fd-dot" style="background:var(--wb-app-gain-500, #F24C3D)"></i>回撤修复天数 <b>81天</b><br><span class="wb-fd-legend-sub">超24%同类</span></span>
+      </div>
+      <div class="wb-fd-chart">
+        <div class="wb-fd-chart-yaxis">
+          <span>30.00%</span><span>20.00%</span><span>10.00%</span><span>0.00%</span><span>-10.00%</span>
+        </div>
+        <div class="wb-fd-chart-main">
+          <div class="wb-fd-chart-plot">
+            <div class="wb-fd-chart-gridlines"></div>
+            <div class="wb-fd-drawdown-band" style="left:30%; width:16%;"></div>
+            <img class="wb-fd-chart-line" src="/profile/design-system/assets/chart-drawdown-line.svg" alt="" style="opacity:.4">
+            <span class="wb-fd-chart-flag" style="left:41%; top:30%;">81天修复</span>
+          </div>
+          <div class="wb-fd-chart-xaxis">
+            <span>2024-11-22</span><span>2025-05-28</span><span>2025-11-24</span>
+          </div>
+        </div>
+      </div>
+      <div class="wb-fd-info-note"><b>最大回撤</b> 数值越小越好，表示一段时间内的最大亏损</div>
+    </div>
+
+    <!-- 投资性价比 card -->
+    <div class="wb-fd-card">
+      <div class="wb-fd-card-header-row">
+        <span class="wb-fd-card-title">投资性价比</span>
+        <span class="wb-fd-period-select">近1年<img src="/profile/design-system/assets/chevron-right.svg" alt="" width="10" height="10" style="transform:rotate(90deg)"></span>
+      </div>
+      <table class="wb-fd-table" style="margin-top: 8px;">
+        <thead>
+          <tr><th class="wb-fd-table-left">近1年</th><th>本基金</th><th>同类平均</th><th>同类排行</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="wb-fd-table-left">夏普比率ⓘ</td>
+            <td><b>2.13</b></td>
+            <td>1.15</td>
+            <td><b>139</b><span class="wb-fd-table-dim">/357</span> <span class="wb-fd-rank-badge wb-fd-rank-badge--general">一般</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="wb-fd-info-note">夏普比率 数值越大越好，表示每单位风险可获得的超额收益</div>
+    </div>
+
+    <!-- 基金持仓 card -->
+    <div class="wb-fd-card">
+      <div class="wb-fd-card-title" style="margin-bottom: 10px;">基金持仓</div>
+
+      <div class="wb-fd-card-header-row">
+        <span class="wb-fd-holdings-subtitle">资产分布</span>
+        <span class="wb-fd-dim-date">截至2025-09-30</span>
+      </div>
+      <div class="wb-fd-asset-box">
+        <div class="wb-fd-asset-item"><span class="wb-fd-asset-value">94.90%</span><span class="wb-fd-asset-label">股票</span></div>
+        <div class="wb-fd-asset-item"><span class="wb-fd-asset-value wb-fd-dim">6.55%</span><span class="wb-fd-asset-label">现金</span></div>
+        <div class="wb-fd-asset-item"><span class="wb-fd-asset-value wb-fd-dim">0.07%</span><span class="wb-fd-asset-label">债券</span></div>
+        <div class="wb-fd-asset-item"><span class="wb-fd-asset-value wb-fd-dim">1.78%</span><span class="wb-fd-asset-label">其他</span></div>
+        <div class="wb-fd-asset-note">*为什么总和超过100% ⓘ</div>
+      </div>
+
+      <div class="wb-fd-holdings-tabs">
+        <span class="wb-fd-holdings-tab wb-fd-holdings-tab--active">重仓股票</span>
+        <span class="wb-fd-holdings-tab">重仓基金</span>
+        <span class="wb-fd-holdings-tab">重仓债券</span>
+      </div>
+
+      <div class="wb-fd-card-header-row">
+        <span class="wb-fd-holdings-subtitle">行业分布</span>
+        <span class="wb-fd-dim-date">截至2025-09-30</span>
+      </div>
+      <div class="wb-fd-industry-legend">
+        <span><i class="wb-fd-dot" style="background:#517BFF"></i>制造 94.90%… 88.39%</span>
+        <span><i class="wb-fd-dot" style="background:#17C4FC"></i>科技 6.01%</span>
+        <span><i class="wb-fd-dot" style="background:#7063FB"></i>资源 4.11%</span>
+        <span><i class="wb-fd-dot" style="background:var(--wb-app-orange-500, #F99C4B)"></i>消费 1.49%</span>
+      </div>
+      <div class="wb-fd-industry-bar">
+        <span style="background:#517BFF; width:83%;"></span>
+        <span style="background:#17C4FC; width:6%;"></span>
+        <span style="background:#7063FB; width:6%;"></span>
+        <span style="background:var(--wb-app-orange-500, #F99C4B); width:2%;"></span>
+      </div>
+
+      <div class="wb-fd-card-header-row" style="margin-top: 14px;">
+        <span class="wb-fd-holdings-subtitle">重仓股票 <span class="wb-fd-dim">前10大重仓股票占比36.67%</span></span>
+        <span class="wb-fd-dim-date">截至2025-09-30</span>
+      </div>
+      <table class="wb-fd-table">
+        <thead>
+          <tr><th class="wb-fd-table-left">股票简称</th><th>涨跌幅</th><th>持仓占比</th><th>较上季度</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="wb-fd-table-left"><b>中国船舶</b><br><span class="wb-fd-dim">航海装备</span></td>
+            <td class="wb-fund-loss">-1.44%</td><td><b>8.55%</b></td><td class="wb-fund-gain">3.39% ▲</td>
+          </tr>
+          <tr>
+            <td class="wb-fd-table-left"><b>中航沈飞</b><br><span class="wb-fd-dim">航空装备</span></td>
+            <td class="wb-fund-loss">-2.03%</td><td><b>5.20%</b></td><td class="wb-fund-gain">0.71% ▲</td>
+          </tr>
+          <tr>
+            <td class="wb-fd-table-left"><b>航发动力</b><br><span class="wb-fd-dim">航空装备</span></td>
+            <td class="wb-fund-loss">-0.64%</td><td><b>3.69%</b></td><td class="wb-fund-gain">0.05% ▲</td>
+          </tr>
+          <tr>
+            <td class="wb-fd-table-left"><b>中航光电</b><br><span class="wb-fd-dim">军工电子</span></td>
+            <td class="wb-fund-loss">-0.90%</td><td><b>3.44%</b></td><td class="wb-fund-loss">0.20% ▼</td>
+          </tr>
+          <tr>
+            <td class="wb-fd-table-left"><b>光启技术</b><br><span class="wb-fd-dim">航空装备</span></td>
+            <td class="wb-fund-gain">+0.66%</td><td><b>4.97%</b></td><td class="wb-fund-gain">0.70% ▲</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="wb-fd-expand-row">展开前10大重仓股票 ▾</div>
+
+      <p class="wb-fd-disclaimer">涨跌幅数据更新至 02-04 15:00，数据仅供参考，不构成投资建议</p>
+    </div>
+
+    <!-- 基金档案 card -->
+    <div class="wb-fd-card">
+      <div class="wb-fd-card-header-row">
+        <span class="wb-fd-card-title">基金档案</span>
+        <span class="wb-fd-dim-date">概况、规模、分红、公告 ›</span>
+      </div>
+      <p class="wb-fd-established">2015-07-08成立（已成立10年140天）</p>
+      <div class="wb-fd-boxes-row">
+        <div class="wb-fd-box">
+          <span class="wb-fd-box-label">基金规模</span>
+          <span class="wb-fd-box-value">6.62亿</span>
+          <span class="wb-fd-box-caption">当前规模 · 截至2025-09-30</span>
+        </div>
+        <div class="wb-fd-box">
+          <span class="wb-fd-box-label">个人持有</span>
+          <span class="wb-fd-box-value">92.96%</span>
+          <span class="wb-fd-box-label" style="margin-top:8px;">机构持有</span>
+          <span class="wb-fd-box-value">7.04%</span>
+        </div>
+      </div>
+
+      <div class="wb-fd-divider"></div>
+
+      <div class="wb-fd-card-header-row">
+        <span class="wb-fd-card-title">基金经理</span>
+        <span class="wb-fd-dim-date">历任经理 ›</span>
+      </div>
+      <div class="wb-fd-manager-row">
+        <img class="wb-fd-manager-photo" src="/profile/design-system/assets/fund-manager-photo.png" alt="余海燕">
+        <div>
+          <div class="wb-fd-manager-name">余海燕</div>
+          <div class="wb-fd-dim">从业15年，从业年化回报 <span class="wb-fund-gain">0.76%</span></div>
+        </div>
+      </div>
+      <div class="wb-fd-manager-stats">
+        <div><span class="wb-fd-box-label">本基金任期</span><span class="wb-fd-box-value" style="font-size:14px;">3年24天</span></div>
+        <div><span class="wb-fd-box-label">任期回报</span><span class="wb-fd-box-value wb-fund-loss" style="font-size:14px;">-0.25%</span></div>
+        <div><span class="wb-fd-box-label">任期年化</span><span class="wb-fd-box-value wb-fund-gain" style="font-size:14px;">1.48%</span></div>
+      </div>
+      <div class="wb-fd-manager-link"><span class="wb-fd-dim">查看该经理管理的其它基金业绩</span> <a href="#">去查看</a></div>
+
+      <div class="wb-fd-divider"></div>
+
+      <div class="wb-fd-card-header-row">
+        <span class="wb-fd-card-title">基金公司</span>
+        <span class="wb-fd-dim-date">公司详情 ›</span>
+      </div>
+      <div class="wb-fd-manager-row">
+        <img class="wb-fd-company-logo" src="/profile/design-system/assets/fund-company-logo.png" alt="易方达基金">
+        <div>
+          <div class="wb-fd-manager-name">易方达基金管理有限公司</div>
+          <div class="wb-fd-dim">2001-04 成立</div>
+        </div>
+      </div>
+      <div class="wb-fd-boxes-row">
+        <div class="wb-fd-box"><span class="wb-fd-box-label">管理规模</span><span class="wb-fd-box-value">25,352.42亿</span></div>
+        <div class="wb-fd-box"><span class="wb-fd-box-label">基金数量</span><span class="wb-fd-box-value">457只</span></div>
+      </div>
+      <div class="wb-fd-more">查看更多</div>
+    </div>
+
+    <!-- 交易规则 card -->
+    <div class="wb-fd-card">
+      <div class="wb-fd-card-title">交易规则</div>
+      <div class="wb-fd-card-tabs">
+        <span class="wb-fd-card-tab wb-fd-card-tab--active">购买规则</span>
+        <span class="wb-fd-card-tab">赎回规则</span>
+      </div>
+      <div class="wb-fd-timeline">
+        <div class="wb-fd-timeline-labels">
+          <div><span class="wb-fd-dim">购买</span><br><b>今天15:00前</b></div>
+          <div><span class="wb-fd-dim">购买确认</span><br><b>11-26</b></div>
+        </div>
+        <div class="wb-fd-timeline-bar">
+          <span class="wb-fd-timeline-fill" style="width:63%;"></span>
+          <span class="wb-fd-timeline-rest">持有中</span>
+        </div>
+      </div>
+      <p class="wb-fd-note"><i class="wb-fd-dot" style="background:var(--wb-app-theme-500, #456CE6); width:6px; height:6px;"></i>今天15:00前买入，以11月25日(今天)净值计算，预计11月26日(明天)确认份额。</p>
+      <div class="wb-fd-more">查看更多</div>
+    </div>
+
+    <!-- 评论 card -->
+    <div class="wb-fd-card">
+      <div class="wb-fd-card-header-row">
+        <span class="wb-fd-card-title">评论(185条)</span>
+        <span class="wb-fd-comment-cta"><img src="/profile/design-system/assets/icon-comment-edit.svg" alt="" width="12" height="12"> 去评论</span>
+      </div>
+
+      <div class="wb-fd-comment">
+        <div class="wb-fd-avatar" style="background:#DCE6FF;"></div>
+        <div class="wb-fd-comment-body">
+          <div class="wb-fd-comment-head">
+            <span class="wb-fd-comment-name">周**</span><span class="wb-fd-comment-tag">买过</span>
+            <span class="wb-fd-comment-delete">删除</span>
+          </div>
+          <p class="wb-fd-comment-text">易方达的和鹏华的哪个性价比高？</p>
+          <div class="wb-fd-comment-meta">34分钟前 <span class="wb-fd-comment-like"><img src="/profile/design-system/assets/icon-comment-like.svg" alt="" width="14" height="14"> 9</span> <span class="wb-fd-comment-reply"><img src="/profile/design-system/assets/icon-comment-reply.svg" alt="" width="14" height="14"></span></div>
+          <div class="wb-fd-comment-nested"><b>吴**：</b><span class="wb-fd-dim">收益率都差不太多其实，最好还是建议可以分摊着各买一些～</span></div>
+        </div>
+      </div>
+
+      <div class="wb-fd-comment">
+        <div class="wb-fd-avatar" style="background:#FFE0D6;"></div>
+        <div class="wb-fd-comment-body">
+          <div class="wb-fd-comment-head"><span class="wb-fd-comment-name">陈**</span><span class="wb-fd-comment-tag">买过</span></div>
+          <p class="wb-fd-comment-text">感觉这个产品还不错！</p>
+          <div class="wb-fd-comment-meta">2025-10-27 14:03 <span class="wb-fd-comment-like"><img src="/profile/design-system/assets/icon-comment-like.svg" alt="" width="14" height="14"> 6</span></div>
+        </div>
+      </div>
+
+      <div class="wb-fd-comment">
+        <div class="wb-fd-avatar" style="background:#E4E7EF;"></div>
+        <div class="wb-fd-comment-body">
+          <div class="wb-fd-comment-head"><span class="wb-fd-comment-name">褚**</span></div>
+          <p class="wb-fd-comment-text">没有买过的小白正在观望中。。。🤔</p>
+          <div class="wb-fd-comment-meta">2025-10-12 17:38 <span class="wb-fd-comment-like"><img src="/profile/design-system/assets/icon-comment-like.svg" alt="" width="14" height="14"> 4</span></div>
+        </div>
+      </div>
+
+      <div class="wb-fd-comment">
+        <div class="wb-fd-avatar" style="background:#E4E7EF;"></div>
+        <div class="wb-fd-comment-body">
+          <div class="wb-fd-comment-head"><span class="wb-fd-comment-name">王**</span></div>
+          <p class="wb-fd-comment-text">还差36个点</p>
+          <div class="wb-fd-comment-meta">2025-10-12 17:38 <span class="wb-fd-comment-like"><img src="/profile/design-system/assets/icon-comment-like.svg" alt="" width="14" height="14"> 2</span></div>
+        </div>
+      </div>
+
+      <div class="wb-fd-comment wb-fd-comment--last">
+        <div class="wb-fd-avatar" style="background:#E4E7EF;"></div>
+        <div class="wb-fd-comment-body">
+          <div class="wb-fd-comment-head"><span class="wb-fd-comment-name">陈**</span></div>
+          <p class="wb-fd-comment-text">好难回来啊</p>
+          <div class="wb-fd-comment-meta">2025-10-12 17:38 <span class="wb-fd-comment-like"><img src="/profile/design-system/assets/icon-comment-like.svg" alt="" width="14" height="14"> 1</span></div>
+        </div>
+      </div>
+
+      <div class="wb-fd-more">查看更多</div>
+    </div>
+
+  </div>
+
+  <!-- ===== FIXED BOTTOM ACTION BAR ===== -->
+  <div class="wb-fd-bottom-bar">
+    <div class="wb-fd-bottom-fee">购买费率：<b>0.00%</b> <s>1.50%</s></div>
+    <div class="wb-fd-bottom-actions">
+      <button class="wb-fd-favorite">
+        <span class="wb-fd-favorite-icon">+</span>加自选
+      </button>
+      <button class="wb-fd-btn wb-fd-btn--secondary">定投</button>
+      <button class="wb-fd-btn wb-fd-btn--primary">购买</button>
+    </div>
+  </div>
+
+</div>
+
+<style>
+  /* Chrome theming: this screen's navbar is dark-blue with white icons,
+     continuing into the blue hero below it (see top-of-file note) — override
+     the platform chrome's default black-on-white via its CSS variable hooks. */
+  :root {
+    --chrome-navbar-bg: var(--wb-app-header-blue, #3D60CC);
+    --chrome-fg: #FFFFFF;
+    --chrome-tint: #FFFFFF;
+  }
+
+  /* Blue hero */
+  .wb-fd-hero {
+    background: var(--wb-app-header-blue, #3D60CC);
+    padding: 12px 12px 40px;
+    color: var(--brand-accent-text, #FFFFFF);
+  }
+  .wb-fd-hero-tag { font-size: 12px; color: #C5CFF0; }
+  .wb-fd-hero-name { font-size: 20px; line-height: 24px; font-weight: 500; margin-top: 6px; }
+  .wb-fd-hero-actions { display: flex; gap: 4px; margin-top: 11px; }
+  .wb-fd-hero-action {
+    display: flex; align-items: center; gap: 3px;
+    height: 20px;
+    background: #FEEEED; border: 0.5px solid #FBCCC8; border-radius: 2px;
+    padding: 0 4px 0 0; font-size: 10px; color: #F05446; white-space: nowrap;
+  }
+  .wb-fd-hero-quick-label {
+    align-self: stretch;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    border-radius: 2px 0 0 2px;
+    background: var(--wb-app-theme-500, #456CE6);
+    color: var(--brand-accent-text, #FFFFFF);
+    padding: 0 4px;
+  }
+  .wb-fd-hero-action-icon { display: block; flex-shrink: 0; }
+  .wb-fd-hero-action--gold { padding-left: 4px; border: 0; background: rgba(255,255,255,0.9); color: #754014; }
+  .wb-fd-hero-action-gold-text {
+    background: linear-gradient(170deg, #6D410F, #D37E1D);
+    -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 600;
+  }
+  .wb-fd-hero-traits { display: flex; gap: 4px; margin-top: 6px; }
+  .wb-fd-hero-badge {
+    height: 20px; display: inline-flex; align-items: center;
+    background: #FBE8D8; border-radius: 2px;
+    padding: 0 4px; font-size: 10px; color: #B36B2E; white-space: nowrap;
+  }
+  .wb-fd-hero-minitag {
+    height: 20px; display: inline-flex; align-items: center;
+    background: rgba(255,255,255,0.2); border-radius: 2px;
+    padding: 0 4px; font-size: 10px; color: var(--brand-accent-text, #FFFFFF); white-space: nowrap;
+  }
+  .wb-fd-hero-minitag--linked::after { content: "›"; margin-left: 1px; }
+
+  /* Floating stats card */
+  .wb-fd-stats-card {
+    display: flex; justify-content: space-between;
+    background: var(--wb-app-surface, #FFFFFF); border-radius: 8px;
+    margin: -20px 12px 0; padding: 16px 12px 9px 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .wb-fd-stat { display: flex; flex-direction: column; gap: 3px; }
+  .wb-fd-stat-value { font-size: 24px; font-weight: 500; color: var(--wb-app-text-primary, #37456E); }
+  .wb-fd-stat-label { font-size: 12px; color: var(--wb-app-text-secondary, #9DA2B3); }
+
+  /* Promo card */
+  .wb-fd-promo-card {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--wb-app-surface, #FFFFFF); border-radius: 8px;
+    margin: 12px 12px 0; padding: 8px 16px;
+  }
+  .wb-fd-promo-icon {
+    width: 54px; height: 54px; border-radius: 6px; object-fit: cover; flex-shrink: 0;
+  }
+  .wb-fd-promo-text { flex: 1; }
+  .wb-fd-promo-title { font-size: 14px; font-weight: 500; color: var(--wb-app-text-primary, #37456E); }
+  .wb-fd-promo-sub { font-size: 12px; color: var(--wb-app-text-secondary, #9DA2B3); margin-top: 2px; }
+
+  /* Learn-and-earn banner */
+  .wb-fd-banner {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--wb-app-surface, #FFFFFF); border-radius: 8px;
+    margin: 12px 12px 0; padding: 12px 16px;
+  }
+  .wb-fd-banner-icon { display: block; flex-shrink: 0; width: 20px; height: 20px; }
+  .wb-fd-banner-text { flex: 1; font-size: 14px; color: var(--wb-app-text-primary, #37456E); }
+  .wb-fd-banner-cta {
+    background: rgba(242,76,61,0.1); color: var(--wb-app-gain-500, #F24C3D); border: none;
+    border-radius: 12px; height: 24px; padding: 0 12px; font-size: 12px; font-weight: 500;
+  }
+
+  /* Generic card */
+  .wb-fd-card {
+    background: var(--wb-app-surface, #FFFFFF); border-radius: 8px;
+    margin: 8px 12px 0; padding: 16px;
+  }
+  .wb-fd-performance-card {
+    margin-top: 12px;
+    padding-bottom: 12px;
+  }
+  .wb-fd-card-title { font-size: 16px; font-weight: 500; color: var(--wb-app-text-primary, #37456E); }
+  .wb-fd-card-header-row { display: flex; align-items: center; justify-content: space-between; }
+  .wb-fd-dim-date { font-size: 12px; color: var(--wb-app-text-secondary, #9DA2B3); }
+  .wb-fd-dim { color: var(--wb-app-text-secondary, #9DA2B3); font-size: 12px; font-weight: 400; }
+
+  /* Card tabs (业绩走势/净值走势 etc.) */
+  .wb-fd-card-tabs { display: flex; gap: 12px; margin-bottom: 12px; }
+  .wb-fd-card-tab { font-size: 16px; color: var(--wb-app-text-secondary, #9DA2B3); padding-bottom: 4px; }
+  .wb-fd-card-tab--active {
+    color: var(--wb-app-text-primary, #37456E); font-weight: 500;
+    border-bottom: 4px solid var(--wb-app-theme-500, #456CE6);
+  }
+
+  /* Chart legend */
+  .wb-fd-chart-legend { display: flex; gap: 16px; font-size: 12px; color: var(--wb-app-text-primary, #37456E); margin-bottom: 8px; flex-wrap: wrap; }
+  .wb-fd-legend-item { display: flex; align-items: center; gap: 3px; }
+  .wb-fd-legend-sub { color: var(--wb-app-text-secondary, #9DA2B3); }
+  .wb-fd-dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; }
+
+  /* Chart plot area */
+  .wb-fd-performance-card .wb-fd-card-tabs { margin-bottom: 8px; }
+  .wb-fd-performance-card .wb-fd-chart-legend {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    height: 48px;
+    margin-bottom: 0;
+  }
+  .wb-fd-performance-card .wb-fd-legend-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+  .wb-fd-legend-label { display: flex; align-items: center; gap: 3px; white-space: nowrap; }
+  .wb-fd-chart { display: flex; margin-top: 8px; }
+  .wb-fd-performance-card .wb-fd-chart { margin-top: 4px; }
+  .wb-fd-chart-yaxis {
+    display: flex; flex-direction: column; justify-content: space-between;
+    font-size: 10px; color: var(--wb-app-text-secondary, #9DA2B3); text-align: right; padding-right: 8px; width: 49px; padding-bottom: 12px;
+  }
+  .wb-fd-chart-main { flex: 1; min-width: 0; }
+  .wb-fd-chart-plot { position: relative; height: 140px; }
+  .wb-fd-chart-gridlines {
+    position: absolute; inset: 0;
+    background-image: repeating-linear-gradient(to bottom, var(--wb-app-divider, #F0F0F0) 0, var(--wb-app-divider, #F0F0F0) 1px, transparent 1px, transparent 25%);
+  }
+  .wb-fd-chart-area, .wb-fd-chart-line {
+    position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; object-fit: fill;
+  }
+  .wb-fd-drawdown-band { position: absolute; top: 0; bottom: 0; background: rgba(242,76,61,0.06); }
+  .wb-fd-chart-marker {
+    position: absolute; top: 0; bottom: 0; width: 1px; background: rgba(0,0,0,0.1);
+  }
+  .wb-fd-chart-marker-label {
+    position: absolute; top: 4px; left: 4px; white-space: nowrap;
+    background: var(--wb-app-orange-500, #F99C4B); color: var(--brand-accent-text, #FFF); font-size: 8px; padding: 2px 6px; border-radius: 4px;
+  }
+  .wb-fd-chart-flag {
+    position: absolute; background: var(--wb-app-gain-500, #F24C3D); color: var(--brand-accent-text, #FFF); font-size: 10px;
+    padding: 2px 8px; border-radius: 4px; white-space: nowrap;
+  }
+  .wb-fd-chart-xaxis {
+    display: flex; justify-content: space-between; font-size: 10px; color: var(--wb-app-text-secondary, #9DA2B3); margin-top: 4px;
+  }
+  .wb-fd-chart-periods {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .wb-fd-chart-periods > span {
+    flex: 1;
+    height: 27px;
+    border-radius: 14px;
+    background: #FAFAFA;
+    color: var(--wb-app-text-secondary, #9DA2B3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
+  .wb-fd-chart-periods .wb-fd-chart-period--active {
+    background: var(--brand-selected-bg, #ECF0FC);
+    color: var(--wb-app-theme-500, #456CE6);
+    font-weight: 500;
+  }
+  .wb-fd-chart-periods .wb-fd-chart-period-arrow {
+    flex: 0 0 27px;
+  }
+
+  /* Period pill row */
+  .wb-fd-pill-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  .wb-fd-pill { font-size: 12px; color: var(--wb-app-text-secondary, #9DA2B3); background: #FAFAFA; border-radius: 16px; padding: 6px 12px; }
+  .wb-fd-pill--active { color: var(--wb-app-theme-500, #456CE6); background: var(--brand-selected-bg, #ECF0FC); font-weight: 500; }
+
+  .wb-fd-period-select {
+    font-size: 12px; color: var(--wb-app-text-secondary, #9DA2B3); border: 1px solid #E6E7EC; border-radius: 10px; padding: 3px 8px;
+    display: inline-flex; align-items: center; gap: 3px;
+  }
+
+  /* Data table */
+  .wb-fd-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .wb-fd-table th { color: var(--wb-app-text-secondary, #9DA2B3); font-weight: 400; text-align: right; padding: 6px 0; }
+  .wb-fd-table td { text-align: right; padding: 8px 0; color: var(--wb-app-text-primary, #37456E); }
+  .wb-fd-table-left { text-align: left !important; }
+  .wb-fd-table-dim { color: var(--wb-app-text-secondary, #9DA2B3); }
+  .wb-fd-rank-badge { font-size: 9px; border-radius: 2px; padding: 1px 4px; }
+  .wb-fd-rank-badge--great { background: #FEEDEC; color: var(--wb-app-gain-500, #F24C3D); }
+  .wb-fd-rank-badge--good { background: #FEF5ED; color: var(--wb-app-orange-500, #F99C4B); }
+  .wb-fd-rank-badge--ok, .wb-fd-rank-badge--general { background: var(--brand-selected-bg, #ECF0FC); color: var(--wb-app-theme-500, #456CE6); }
+
+  .wb-fd-more { text-align: center; color: var(--wb-app-theme-500, #456CE6); font-size: 14px; margin-top: 10px; }
+  .wb-fd-info-note {
+    background: #F7F9FF; border-radius: 4px; padding: 8px 10px; font-size: 10px; color: var(--wb-app-text-secondary, #9DA2B3); margin-top: 10px;
+  }
+
+  /* Holdings */
+  .wb-fd-holdings-subtitle { font-size: 14px; font-weight: 500; color: var(--wb-app-text-primary, #37456E); }
+  .wb-fd-asset-box {
+    display: flex; flex-wrap: wrap; gap: 8px 16px;
+    background: #F7F9FF; border-radius: 8px; padding: 10px 12px; margin-top: 6px;
+  }
+  .wb-fd-asset-item { display: flex; flex-direction: column; gap: 2px; min-width: 60px; }
+  .wb-fd-asset-value { font-size: 12px; font-weight: 500; color: var(--wb-app-text-primary, #37456E); }
+  .wb-fd-asset-label { font-size: 11px; color: var(--wb-app-text-secondary, #9DA2B3); }
+  .wb-fd-asset-note { flex-basis: 100%; font-size: 10px; color: var(--wb-app-text-secondary, #9DA2B3); }
+  .wb-fd-holdings-tabs { display: flex; gap: 16px; margin: 10px 0; font-size: 12px; color: var(--wb-app-text-secondary, #9DA2B3); }
+  .wb-fd-holdings-tab--active { color: var(--wb-app-theme-500, #456CE6); font-weight: 500; }
+  .wb-fd-industry-legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 11px; color: var(--wb-app-text-primary, #37456E); margin: 8px 0 4px; }
+  .wb-fd-industry-bar { display: flex; height: 8px; border-radius: 6px; overflow: hidden; }
+  .wb-fd-industry-bar span { display: block; height: 100%; }
+  .wb-fd-expand-row { text-align: center; background: #F7F9FF; border-radius: 8px; padding: 8px; font-size: 12px; color: var(--wb-app-text-secondary, #9DA2B3); margin-top: 8px; }
+  .wb-fd-disclaimer { font-size: 10px; color: var(--wb-app-text-secondary, #9DA2B3); margin-top: 10px; }
+
+  /* Fund profile */
+  .wb-fd-established { font-size: 12px; color: var(--wb-app-text-primary, #37456E); margin: 8px 0 12px; }
+  .wb-fd-boxes-row { display: flex; gap: 8px; }
+  .wb-fd-box { flex: 1; background: #F7F9FF; border-radius: 4px; padding: 10px; display: flex; flex-direction: column; gap: 2px; }
+  .wb-fd-box-label { font-size: 12px; color: var(--wb-app-text-secondary, #9DA2B3); }
+  .wb-fd-box-value { font-size: 16px; font-weight: 500; color: var(--wb-app-text-primary, #37456E); }
+  .wb-fd-box-caption { font-size: 8px; color: var(--wb-app-text-secondary, #9DA2B3); opacity: .5; margin-top: 2px; }
+  .wb-fd-divider { height: 0.5px; background: var(--wb-app-divider, #F0F0F0); margin: 14px 0; }
+
+  .wb-fd-manager-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+  .wb-fd-manager-photo { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+  .wb-fd-company-logo { width: 40px; height: 40px; border-radius: 8px; object-fit: contain; background: var(--wb-app-surface, #fff); }
+  .wb-fd-manager-name { font-size: 14px; font-weight: 500; color: var(--wb-app-text-primary, #37456E); }
+  .wb-fd-manager-stats {
+    display: flex; justify-content: space-between; background: #F7F9FF;
+    border-radius: 4px; padding: 10px 12px; margin-top: 8px; gap: 8px;
+  }
+  .wb-fd-manager-stats > div { display: flex; flex-direction: column; gap: 4px; }
+  .wb-fd-manager-link { font-size: 10px; margin-top: 6px; }
+  .wb-fd-manager-link a { color: var(--wb-app-theme-500, #456CE6); }
+
+  /* Trading rules */
+  .wb-fd-timeline { margin-top: 8px; }
+  .wb-fd-timeline-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--wb-app-text-secondary, #9DA2B3); }
+  .wb-fd-timeline-labels b { color: var(--wb-app-text-primary, #37456E); font-weight: 500; }
+  .wb-fd-timeline-bar {
+    position: relative; height: 22px; border-radius: 11px; overflow: hidden;
+    background: var(--brand-selected-bg, #ECF0FC); margin-top: 8px; display: flex; align-items: center;
+  }
+  .wb-fd-timeline-fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--wb-app-theme-500, #456CE6); }
+  .wb-fd-timeline-rest {
+    position: absolute; right: 10px; font-size: 10px; color: var(--brand-accent-text, #FFF); z-index: 1;
+  }
+  .wb-fd-note { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--wb-app-text-secondary, #9DA2B3); margin-top: 10px; }
+
+  /* Comments */
+  .wb-fd-comment-cta { font-size: 12px; color: var(--wb-app-theme-500, #456CE6); display: inline-flex; align-items: center; gap: 4px; }
+  .wb-fd-comment-like, .wb-fd-comment-reply { display: inline-flex; align-items: center; gap: 3px; }
+  .wb-fd-comment-like img, .wb-fd-comment-reply img { display: block; }
+  .wb-fd-comment { display: flex; gap: 8px; padding: 12px 0; border-bottom: 0.5px solid var(--wb-app-divider, #F0F0F0); }
+  .wb-fd-comment--last { border-bottom: none; }
+  .wb-fd-avatar { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; }
+  .wb-fd-comment-body { flex: 1; min-width: 0; }
+  .wb-fd-comment-head { display: flex; align-items: center; gap: 6px; }
+  .wb-fd-comment-name { font-size: 14px; font-weight: 500; color: var(--wb-app-text-primary, #37456E); }
+  .wb-fd-comment-tag { font-size: 10px; color: var(--wb-app-orange-500, #F99C4B); background: rgba(249,156,75,0.12); border-radius: 3px; padding: 1px 5px; }
+  .wb-fd-comment-delete { margin-left: auto; font-size: 12px; color: var(--wb-app-text-secondary, #9DA2B3); }
+  .wb-fd-comment-text { font-size: 14px; color: var(--wb-app-text-primary, #37456E); margin: 6px 0; }
+  .wb-fd-comment-meta { font-size: 12px; color: var(--wb-app-text-secondary, #9DA2B3); display: flex; gap: 12px; align-items: center; }
+  .wb-fd-comment-nested {
+    background: #F7F9FF; border-radius: 6px; padding: 8px 10px; margin-top: 8px; font-size: 12px; color: var(--wb-app-text-primary, #37456E);
+  }
+
+  /* .wb-fund-gain/.wb-fund-loss now live in components.css */
+
+  /* Fixed bottom bar */
+  .wb-fd-bottom-bar {
+    position: absolute; bottom: 0; left: 0; width: var(--wb-app-page-width, 375px);
+    background: var(--wb-app-surface, #FFFFFF); border-top: 0.5px solid var(--wb-app-divider, #F0F0F0);
+    padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+  }
+  .wb-fd-bottom-fee { text-align: center; font-size: 12px; color: var(--wb-app-orange-500, #F99C4B); padding: 4px 0; }
+  .wb-fd-bottom-fee s { color: var(--wb-app-text-secondary, #9DA2B3); margin-left: 4px; }
+  .wb-fd-bottom-actions { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+  .wb-fd-favorite {
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    background: none; border: none; font-size: 10px; color: var(--wb-app-orange-500, #F99C4B); width: 44px; flex-shrink: 0;
+  }
+  .wb-fd-favorite-icon {
+    width: 24px; height: 24px; border: 1.5px solid var(--wb-app-orange-500, #F99C4B); border-radius: 6px;
+    display: flex; align-items: center; justify-content: center; font-size: 16px;
+  }
+  .wb-fd-btn {
+    flex: 1; height: 44px; border-radius: 22px; border: none; font-size: 16px; font-weight: 500;
+  }
+  .wb-fd-btn--secondary { background: rgba(249,156,75,0.1); color: var(--wb-app-orange-500, #F99C4B); }
+  .wb-fd-btn--primary { background: var(--wb-app-orange-500, #F99C4B); color: var(--brand-accent-text, #FFFFFF); }
+</style>

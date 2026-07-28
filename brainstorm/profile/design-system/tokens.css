@@ -1,0 +1,94 @@
+/* =============================================================================
+   微众银行APP (WB-APP) Design System — Design Tokens
+   Copy this file into your project as-is, or extract the relevant sections.
+   Source: Figma variables bound to the confirmed screens, plus the file's own
+   "tokens-color" reference sheet (node 3002:4228) — not eyeballed from renders.
+   ============================================================================= */
+
+:root {
+  /* ===== COLOR TOKENS ===== */
+
+  /* Primary (主色) */
+  --wb-app-theme-500: #456CE6;        /* 主色/蓝 — module buttons, text links, tab-selected, progress bars */
+  --wb-app-orange-500: #F99C4B;       /* 主色/橙 — primary-flow CTA buttons (购买/定投), emphasis text */
+
+  /* Text (文本色) */
+  --wb-app-text-primary: #37456E;     /* 一级文本色 */
+  --wb-app-text-secondary: #9DA2B3;   /* 二级文本色 */
+  --wb-app-text-tertiary: #DFE0E6;    /* 提示文本色 */
+  --wb-app-gain-500: #F24C3D;         /* 涨幅、警示 — red = gain (CN market convention, opposite of Western) */
+  --wb-app-loss-500: #12B38A;         /* 跌幅 — green = loss */
+
+  /* Secondary / auxiliary (辅助色) */
+  --wb-app-header-blue: #3D60CC;      /* 页面头部蓝色背景 — colored navbar screens (基金排行/基金详情页) */
+  --wb-app-divider: #F0F0F0;
+  --wb-app-bg: #F5F5F5;               /* 页面背景色 — default; list/leaderboard screens override to white */
+  --wb-app-surface: #FFFFFF;
+  --wb-app-tag-text: #BF7C4D;
+  --wb-app-tag-bg: #FFF0E0;
+  --wb-app-notify-text: #B57D20;
+  --wb-app-notify-bg: #FFF0D2;
+
+  /* Gradients — 银行卡背景色 (bank-card backgrounds). Not used by the 4 confirmed
+     screens yet; captured from the reference sheet for screens added later.
+     Angle isn't given by the sheet (stops only) — 135deg is an assumption. */
+  --wb-app-card-webank: linear-gradient(135deg, #456CE6, #3D60CC);   /* 微众卡 */
+  --wb-app-card-add: linear-gradient(135deg, #C6CCDB, #B8BED0);      /* 添加银行卡 */
+  --wb-app-card-red: linear-gradient(135deg, #E65050, #D94C4C);      /* 红卡 */
+  --wb-app-card-orange: linear-gradient(135deg, #F2A355, #E69545);   /* 橙卡 */
+  --wb-app-card-blue: linear-gradient(135deg, #3A55A6, #364E99);     /* 蓝卡 */
+  --wb-app-card-green: linear-gradient(135deg, #3AA68B, #369980);    /* 绿卡 */
+
+  /* ===== TYPOGRAPHY ===== */
+
+  --wb-app-font-family: -apple-system, BlinkMacSystemFont, "PingFang SC",
+    "Helvetica Neue", "Noto Sans CJK SC", sans-serif;
+
+  --wb-app-text-caption2: 10px;   /* smallest labels (rank sub-stats) */
+  --wb-app-text-caption: 12px;    /* the most common size across all 4 screens */
+  --wb-app-text-body2: 14px;      /* second most common — secondary body */
+  --wb-app-text-body1: 16px;      /* emphasized values, card titles */
+  --wb-app-text-h2: 18px;
+  --wb-app-text-h1: 20px;
+  --wb-app-text-display: 24px;    /* hero titles, stat headline */
+
+  /* ===== SPACING ===== */
+  /* pagePadding measured from actual card margins across the 4 confirmed screens. */
+  --wb-app-page-padding: 12px;
+  --wb-app-card-padding: 16px;
+  --wb-app-section-gap: 12px;
+  --wb-app-item-gap: 8px;
+
+  /* ===== RADII ===== */
+  --wb-app-radius-card: 12px;   /* measured — the common card/list-row radius */
+  --wb-app-radius-pill: 8px;    /* measured — the most common button/tag radius */
+  --wb-app-radius-sm: 4px;
+
+  /* ===== SIZING ===== */
+  --wb-app-page-width: 375px;
+  --wb-app-navbar-height: 44px;
+
+  /* ===== SHARED-MACHINERY HOOKS =====
+     Slots declared by shared machinery (the presentation frame, the phone
+     mockup) and the platform pack, filled here from this profile's own tokens.
+     This is the one-way contract: shared machinery never names a product, and a
+     profile that leaves these unset just gets neutral defaults.
+
+     Note on --brand-success/--brand-error: this product's own gain/loss colors
+     are inverted from universal convention (red=gain, green=loss, per CN market
+     norms) and are used directly via .wb-fund-gain/.wb-fund-loss, never through
+     these hooks. --brand-success/--brand-error instead get the closest literal
+     hue for shared machinery's own generic success/error indicators (e.g. the
+     annotation tool), which do expect the universal green=success/red=error. */
+  --brand-accent: var(--wb-app-orange-500);
+  --brand-accent-hover: var(--wb-app-orange-500);
+  --brand-accent-hover-dark: var(--wb-app-orange-500);
+  --brand-accent-text: #FFFFFF;
+  --brand-success: var(--wb-app-loss-500);
+  --brand-warning: var(--wb-app-orange-500);
+  --brand-error: var(--wb-app-gain-500);
+  --brand-selected-bg: #ECF0FC;
+  --brand-selected-bg-dark: #ECF0FC;
+  --phone-screen-bg: var(--wb-app-bg);
+  --chrome-navbar-bg: var(--wb-app-surface);
+}

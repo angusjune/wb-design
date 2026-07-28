@@ -1,0 +1,189 @@
+<style data-platform-chrome>
+/* =============================================================================
+   iOS — Presentation Chrome
+
+   Part of the `ios` platform pack. Belongs to the platform, not to any product:
+   every iOS app has this same status bar, navigation bar and home indicator,
+   whatever the product's design system looks like.
+
+   Presentation only — this reproduces iOS's shell around a screen; it is never
+   production code. Copy this file's style block once and its nav markup into
+   each phone in the standalone brainstorm HTML.
+
+   Self-contained by design: it borrows no token from the product profile, so
+   swapping profile/ cannot break the chrome. A profile may optionally override
+   --chrome-navbar-bg.
+
+   Note the shape difference from the wechat pack, which is the point of having
+   two: iOS has no capsule, its nav bar is 44px (not 88px including status), it
+   uses a text back-label rather than a bare chevron, and it adds a bottom home
+   indicator that WeChat has no equivalent for. Anything in shared machinery
+   that assumed WeChat's shape had to become configurable to support this.
+   ============================================================================= */
+
+:root {
+  --chrome-black: #000000;
+  --chrome-fg: var(--chrome-black);   /* status bar + title color — override per-screen for colored/dark navbars */
+  --chrome-tint: #007AFF;             /* iOS system blue — back button, actions */
+  --chrome-separator: rgba(60, 60, 67, 0.29);
+}
+
+/* --- Status bar (44px on notched devices) --- */
+.chrome-statusbar {
+  height: 44px;
+  padding: 0 24px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding-bottom: 2px;
+  color: var(--chrome-fg);
+  font-size: 15px;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+.chrome-statusbar-time {
+  letter-spacing: -0.2px;
+}
+
+.chrome-statusbar-icons {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.chrome-statusbar-icons svg {
+  display: block;
+  color: var(--chrome-fg);
+}
+
+/* --- Navigation bar (44px, sits below the status bar) --- */
+.chrome-navbar {
+  background: var(--chrome-navbar-bg, #FFFFFF);
+  position: relative;
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.chrome-titlebar {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding: 0 8px;
+  border-bottom: 0.33px solid var(--chrome-separator);
+}
+
+.chrome-navbar--home .chrome-titlebar {
+  border-bottom: none;
+}
+
+/* Large title, used by root screens */
+.chrome-navbar--home .chrome-largetitle {
+  display: block;
+  padding: 0 16px 8px;
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  color: var(--chrome-fg);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+}
+
+.chrome-largetitle {
+  display: none;
+}
+
+.chrome-navbar-back {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  padding: 0 4px;
+  cursor: pointer;
+  color: var(--chrome-tint);
+  font-size: 17px;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+}
+
+.chrome-navbar-back svg {
+  width: 12px;
+  height: 20px;
+  display: block;
+}
+
+.chrome-navbar--home .chrome-navbar-back {
+  visibility: hidden;
+}
+
+.chrome-navbar-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--chrome-fg);
+  white-space: nowrap;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+}
+
+.chrome-navbar--home .chrome-navbar-title {
+  display: none;
+}
+
+/* Optional trailing nav-bar action (e.g. share/favorite/support). A profile
+   passes it via <preview-chrome trailing="<svg>...</svg>">; empty by default
+   and collapses to nothing when no screen sets it. Icon content should use
+   currentColor so it follows --chrome-fg like the rest of the bar. */
+.chrome-navbar-trailing {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
+  color: var(--chrome-fg);
+}
+
+.chrome-navbar-trailing:empty {
+  display: none;
+}
+
+</style>
+
+<nav class="chrome-navbar {{variant_class}}">
+  <div class="chrome-statusbar">
+    <span class="chrome-statusbar-time">9:41</span>
+    <div class="chrome-statusbar-icons">
+      <svg width="18" height="12" viewBox="0 0 18 12" aria-hidden="true">
+        <rect x="0" y="7.5" width="3" height="4.5" rx="1" fill="currentColor"/>
+        <rect x="4.5" y="5" width="3" height="7" rx="1" fill="currentColor"/>
+        <rect x="9" y="2.5" width="3" height="9.5" rx="1" fill="currentColor"/>
+        <rect x="13.5" y="0" width="3" height="12" rx="1" fill="currentColor"/>
+      </svg>
+      <svg width="16" height="12" viewBox="0 0 16 12" aria-hidden="true">
+        <path d="M8 3.6C10.2 3.6 12.1 4.5 13.4 6L15 4.4C13.3 2.7 10.8 1.6 8 1.6S2.7 2.7 1 4.4L2.6 6C3.9 4.5 5.8 3.6 8 3.6Z" fill="currentColor"/>
+        <path d="M8 7.2C9.3 7.2 10.5 7.7 11.4 8.6L8 12L4.6 8.6C5.5 7.7 6.7 7.2 8 7.2Z" fill="currentColor"/>
+      </svg>
+      <svg width="27" height="13" viewBox="0 0 27 13" aria-hidden="true">
+        <rect x="0.5" y="0.5" width="23" height="12" rx="3.8" stroke="currentColor" stroke-opacity="0.35" fill="none"/>
+        <rect x="25" y="4.5" width="1.5" height="4" rx="0.75" fill="currentColor" fill-opacity="0.4"/>
+        <rect x="2" y="2" width="20" height="9" rx="2.5" fill="currentColor"/>
+      </svg>
+    </div>
+  </div>
+  <div class="chrome-titlebar">
+    <button class="chrome-navbar-back" aria-label="Back">
+      <svg viewBox="0 0 12 20" fill="none" aria-hidden="true">
+        <path d="M10 2L2 10L10 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <span class="chrome-navbar-title">{{title}}</span>
+    <span class="chrome-navbar-trailing">{{trailing}}</span>
+  </div>
+  <span class="chrome-largetitle">{{title}}</span>
+</nav>

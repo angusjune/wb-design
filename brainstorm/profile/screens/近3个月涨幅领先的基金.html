@@ -1,0 +1,355 @@
+<!--
+  WB-APP Screen: 近3个月涨幅领先的基金 (Fund leaderboard — trailing 3-month gains)
+  A ranked leaderboard of the top 10 funds by a rotating metric (3-month gain, search volume, etc.).
+  Layout: Preview chrome (inner, no title) → red hero banner → filter/period row → ranked list card → compliance disclaimer
+  Background: #F5F5F5, with a rounded white filter/list surface below the red hero.
+  Note: source hero has a transparent status bar with WHITE icons over a red background. The shared
+  iOS chrome now supports icon-color theming (--chrome-fg/--chrome-tint) and is set to white here,
+  with --chrome-navbar-bg approximated to the hero's own starting red — true transparency-over-content
+  isn't supported by the chrome's architecture (a separate <nav> in document flow, not an overlay),
+  so this is a close approximation, not pixel-exact.
+  The trailing export/share icon is passed via <preview-chrome trailing="...">, a generic slot
+  added to platforms/ios/chrome.html + scripts/serve-preview.cjs (hand-drawn SVG reproduction —
+  the real "-on dark" asset resisted clean chroma-key extraction).
+-->
+
+<div class="wb-app-page" style="background: var(--wb-app-bg, #F5F5F5);">
+
+  <!-- ===== iOS CHROME (Presentation-only) ===== -->
+  <preview-chrome variant="inner" title="" trailing='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden="true"><path d="M14 4H20V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 4L11 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M18 14V18.5C18 19.3284 17.3284 20 16.5 20H5.5C4.67157 20 4 19.3284 4 18.5V7.5C4 6.67157 4.67157 6 5.5 6H10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>'></preview-chrome>
+
+  <!-- ===== PAGE BODY ===== -->
+  <div class="wb-app-page-body" style="padding-bottom: 20px;">
+
+    <!-- Red hero banner -->
+    <div class="wb-fund-hero">
+      <div class="wb-fund-hero-title">
+        <img class="wb-fund-hero-leaf wb-fund-hero-leaf--left" src="/profile/design-system/assets/icon-laurel-leaf.svg" alt="" width="18" height="36">
+        近3个月涨幅领先的基金
+        <img class="wb-fund-hero-leaf wb-fund-hero-leaf--right" src="/profile/design-system/assets/icon-laurel-leaf.svg" alt="" width="18" height="36">
+      </div>
+      <div class="wb-fund-hero-subtitle">
+        近3个月涨跌幅靠前的基金
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.85)" stroke-width="1.5"/><path d="M12 11v5.5M12 7.5v.01" stroke="rgba(255,255,255,0.85)" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+    </div>
+
+    <!-- Filter / period row -->
+    <div class="wb-fund-filter-row">
+      <div class="wb-fund-filter-left">
+        <span class="wb-fund-filter-item wb-fund-filter-item--active">全部<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="transform: rotate(90deg);"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="wb-fund-filter-divider"></span>
+        <span class="wb-fund-filter-item wb-fund-filter-item--active">近三个月<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="transform: rotate(90deg);"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </div>
+      <span class="wb-fund-filter-more">更多榜单<img src="/profile/design-system/assets/chevron-right.svg" alt="" width="14" height="14"></span>
+    </div>
+
+    <!-- Ranked list card -->
+    <div class="wb-fund-rank-card">
+
+      <div class="wb-fund-rank-row">
+        <div class="wb-fund-rank-badge wb-fund-rank-badge--first">1</div>
+        <div class="wb-fund-rank-main">
+          <div class="wb-fund-rank-name">财通匠心优选一年持有期混合A<svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#456CE6"/><path d="M8 12.5l2.5 2.5L16 9.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="wb-fund-rank-stats">
+            <div class="wb-fund-rank-stat"><span class="wb-fund-rank-stat-value wb-fund-gain">131.83%</span><span class="wb-fund-rank-stat-label">近三个月涨跌幅</span></div>
+            <div class="wb-fund-rank-stat"><span class="wb-fund-rank-stat-value wb-fund-gain">452.40%</span><span class="wb-fund-rank-stat-label">近一年涨跌幅</span></div>
+            <button class="wb-fund-rank-cta">买一笔</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="wb-fund-rank-row">
+        <div class="wb-fund-rank-badge wb-fund-rank-badge--second">2</div>
+        <div class="wb-fund-rank-main">
+          <div class="wb-fund-rank-name">财通景气甄选一年持有期混合A<svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#456CE6"/><path d="M8 12.5l2.5 2.5L16 9.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="wb-fund-rank-stats">
+            <div class="wb-fund-rank-stat"><span class="wb-fund-rank-stat-value wb-fund-gain">129.01%</span><span class="wb-fund-rank-stat-label">近三个月涨跌幅</span></div>
+            <div class="wb-fund-rank-stat"><span class="wb-fund-rank-stat-value wb-fund-gain">450.42%</span><span class="wb-fund-rank-stat-label">近一年涨跌幅</span></div>
+            <button class="wb-fund-rank-cta">买一笔</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="wb-fund-rank-row">
+        <div class="wb-fund-rank-badge wb-fund-rank-badge--third">3</div>
+        <div class="wb-fund-rank-main">
+          <div class="wb-fund-rank-name">财通集成电路产业股票A<svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#456CE6"/><path d="M8 12.5l2.5 2.5L16 9.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="wb-fund-rank-stats">
+            <div class="wb-fund-rank-stat"><span class="wb-fund-rank-stat-value wb-fund-gain">127.50%</span><span class="wb-fund-rank-stat-label">近三个月涨跌幅</span></div>
+            <div class="wb-fund-rank-stat"><span class="wb-fund-rank-stat-value wb-fund-gain">449.24%</span><span class="wb-fund-rank-stat-label">近一年涨跌幅</span></div>
+            <button class="wb-fund-rank-cta">买一笔</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="wb-fund-rank-row">
+        <div class="wb-fund-rank-badge">4</div>
+        <div class="wb-fund-rank-main">
+          <div class="wb-fund-rank-name">财通成长优选混合A<svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#456CE6"/><path d="M8 12.5l2.5 2.5L16 9.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="wb-fund-rank-stats">
+            <div class="wb-fund-rank-stat"><span class="wb-fund-rank-stat-value wb-fund-gain">121.32%</span><span class="wb-fund-rank-stat-label">近三个月涨跌幅</span></div>
+            <div class="wb-fund-rank-stat"><span class="wb-fund-rank-stat-value wb-fund-gain">448.92%</span><span class="wb-fund-rank-stat-label">近一年涨跌幅</span></div>
+            <button class="wb-fund-rank-cta">买一笔</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="wb-fund-rank-row">
+        <div class="wb-fund-rank-badge">5</div>
+        <div class="wb-fund-rank-main">
+          <div class="wb-fund-rank-name">财通价值动量混合A<svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#456CE6"/><path d="M8 12.5l2.5 2.5L16 9.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="wb-fund-rank-stats">
+            <div class="wb-fund-rank-stat"><span class="wb-fund-rank-stat-value wb-fund-gain">105.49%</span><span class="wb-fund-rank-stat-label">近三个月涨跌幅</span></div>
+            <div class="wb-fund-rank-stat"><span class="wb-fund-rank-stat-value wb-fund-gain">390.73%</span><span class="wb-fund-rank-stat-label">近一年涨跌幅</span></div>
+            <button class="wb-fund-rank-cta">买一笔</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="wb-fund-rank-row">
+        <div class="wb-fund-rank-badge">6</div>
+        <div class="wb-fund-rank-main">
+          <div class="wb-fund-rank-name">大成科技创新混合A<svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#456CE6"/><path d="M8 12.5l2.5 2.5L16 9.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="wb-fund-rank-stats">
+            <div class="wb-fund-rank-stat"><span class="wb-fund-rank-stat-value wb-fund-gain">87.46%</span><span class="wb-fund-rank-stat-label">近30天搜索人数</span></div>
+            <div class="wb-fund-rank-stat"><span class="wb-fund-rank-stat-value wb-fund-gain">304.87%</span><span class="wb-fund-rank-stat-label">近一年涨跌幅</span></div>
+            <button class="wb-fund-rank-cta">买一笔</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="wb-fund-rank-row">
+        <div class="wb-fund-rank-badge">7</div>
+        <div class="wb-fund-rank-main">
+          <div class="wb-fund-rank-name">广发纳斯达克100ETF联接(QDII)A<svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#456CE6"/><path d="M8 12.5l2.5 2.5L16 9.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="wb-fund-rank-stats">
+            <div class="wb-fund-rank-stat"><span class="wb-fund-rank-stat-value wb-fund-gain">超20.46亿元</span><span class="wb-fund-rank-stat-label">近30天搜索人数</span></div>
+            <div class="wb-fund-rank-stat"><span class="wb-fund-rank-stat-value wb-fund-gain">21.71%</span><span class="wb-fund-rank-stat-label">近一年涨跌幅</span></div>
+            <button class="wb-fund-rank-cta wb-fund-rank-cta--wide">去看看</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="wb-fund-rank-row">
+        <div class="wb-fund-rank-badge">8</div>
+        <div class="wb-fund-rank-main">
+          <div class="wb-fund-rank-name">广发纳斯达克100ETF联接(QDII)A<svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#456CE6"/><path d="M8 12.5l2.5 2.5L16 9.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="wb-fund-rank-stats">
+            <div class="wb-fund-rank-stat"><span class="wb-fund-rank-stat-value wb-fund-gain">超20.46亿元</span><span class="wb-fund-rank-stat-label">近30天搜索人数</span></div>
+            <div class="wb-fund-rank-stat"><span class="wb-fund-rank-stat-value wb-fund-gain">21.71%</span><span class="wb-fund-rank-stat-label">近一年涨跌幅</span></div>
+            <button class="wb-fund-rank-cta wb-fund-rank-cta--wide">去看看</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="wb-fund-rank-row">
+        <div class="wb-fund-rank-badge">9</div>
+        <div class="wb-fund-rank-main">
+          <div class="wb-fund-rank-name">广发纳斯达克100ETF联接(QDII)A<svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#456CE6"/><path d="M8 12.5l2.5 2.5L16 9.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="wb-fund-rank-stats">
+            <div class="wb-fund-rank-stat"><span class="wb-fund-rank-stat-value wb-fund-gain">超20.46亿元</span><span class="wb-fund-rank-stat-label">近30天搜索人数</span></div>
+            <div class="wb-fund-rank-stat"><span class="wb-fund-rank-stat-value wb-fund-gain">21.71%</span><span class="wb-fund-rank-stat-label">近一年涨跌幅</span></div>
+            <button class="wb-fund-rank-cta wb-fund-rank-cta--wide">去看看</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="wb-fund-rank-row wb-fund-rank-row--last">
+        <div class="wb-fund-rank-badge">10</div>
+        <div class="wb-fund-rank-main">
+          <div class="wb-fund-rank-name">广发纳斯达克100ETF联接(QDII)A<svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#456CE6"/><path d="M8 12.5l2.5 2.5L16 9.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="wb-fund-rank-stats">
+            <div class="wb-fund-rank-stat"><span class="wb-fund-rank-stat-value wb-fund-gain">超20.46亿元</span><span class="wb-fund-rank-stat-label">近30天搜索人数</span></div>
+            <div class="wb-fund-rank-stat"><span class="wb-fund-rank-stat-value wb-fund-gain">21.71%</span><span class="wb-fund-rank-stat-label">近一年涨跌幅</span></div>
+            <button class="wb-fund-rank-cta wb-fund-rank-cta--wide">去看看</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Compliance disclaimer -->
+    <p class="wb-fund-disclaimer">数据更新时间2025年03月22日17:00，榜单数据仅供参考不构成投资建议。如需购买相关基金产品，请您关注投资者适当性管理相关规定，提前做好风险测评，并根据您自身的风险承受能力购买与之匹配风险等级的基金产品。基金的过往业绩并不预示其未来表现，基金管理人管理的其他基金的业绩，并不构成基金表现的保证。基金投资需注意投资风险，请仔细阅读《基金合同》《基金招募说明书》和《产品资料概要》等法律文件，了解基金的具体情况。市场有风险，投资需谨慎。产品由基金公司发行与管理，代销机构不承担产品的投资、兑付和风险管理责任。</p>
+
+  </div>
+
+</div>
+
+<style>
+  /* Chrome theming: source has a transparent status bar with white icons over
+     the red hero (see top-of-file note) — the shared chrome can't do true
+     transparency-over-content, so approximate with the hero's own starting
+     red and white icons rather than leaving the default black-on-white. */
+  :root {
+    --chrome-navbar-bg: #FF474A;
+    --chrome-fg: #FFFFFF;
+    --chrome-tint: #FFFFFF;
+  }
+
+  /* Red hero banner */
+  .wb-fund-hero {
+    margin-top: -44px;
+    background:
+      linear-gradient(180deg, rgba(255,71,74,0) 62%, var(--wb-app-bg, #F5F5F5) 100%),
+      url("/profile/design-system/assets/fund-leader-hero-rays.png") center top / 329px 187px no-repeat,
+      #FF474A;
+    padding: 48px 20px 50px;
+    text-align: center;
+    color: var(--brand-accent-text, #FFFFFF);
+  }
+  .wb-fund-hero-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .wb-fund-hero-leaf { opacity: 1; flex-shrink: 0; }
+  .wb-fund-hero-leaf--right { transform: scaleX(-1); }
+  .wb-fund-hero-subtitle {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 8px;
+    font-size: 14px;
+    opacity: 0.9;
+  }
+
+  /* Filter / period row */
+  .wb-fund-filter-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    margin-top: -24px;
+    margin-left: 12px;
+    margin-right: 12px;
+    background: var(--wb-app-surface, #FFFFFF);
+    border-radius: 8px 8px 0 0;
+  }
+  .wb-fund-filter-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .wb-fund-filter-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 14px;
+    color: var(--wb-app-text-secondary, #9DA2B3);
+  }
+  .wb-fund-filter-item--active {
+    color: var(--wb-app-theme-500, #456CE6);
+  }
+  .wb-fund-filter-divider {
+    width: 1px;
+    height: 12px;
+    background: rgba(0, 0, 0, 0.1);
+  }
+  .wb-fund-filter-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 14px;
+    color: var(--wb-app-text-secondary, #9DA2B3);
+  }
+
+  /* Ranked list card */
+  .wb-fund-rank-card {
+    background: var(--wb-app-surface, #FFFFFF);
+    border-radius: 0 0 8px 8px;
+    margin: 0 12px;
+    padding: 0 0 70px;
+  }
+  .wb-fund-rank-row {
+    display: grid;
+    grid-template-columns: 26px minmax(0, 1fr);
+    align-items: flex-start;
+    column-gap: 4px;
+    row-gap: 16px;
+    box-sizing: border-box;
+    height: 102px;
+    padding: 16px 16px;
+    border-bottom: 0.5px solid var(--wb-app-divider, #F0F0F0);
+  }
+  .wb-fund-rank-row--last { border-bottom: none; }
+  .wb-fund-rank-badge {
+    flex-shrink: 0;
+    width: 26px;
+    height: 17px;
+    border-radius: 0;
+    background: url("/profile/design-system/assets/rank-badge-other.svg") center / 100% 100% no-repeat;
+    color: var(--brand-accent-text, #FFFFFF);
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0;
+  }
+  .wb-fund-rank-badge--first { background-image: url("/profile/design-system/assets/rank-badge-1.svg"); }
+  .wb-fund-rank-badge--second { background-image: url("/profile/design-system/assets/rank-badge-2.svg"); }
+  .wb-fund-rank-badge--third { background-image: url("/profile/design-system/assets/rank-badge-3.svg"); }
+  .wb-fund-rank-main { display: contents; }
+  .wb-fund-rank-name {
+    grid-column: 2;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 14px;
+    line-height: 17px;
+    font-weight: 500;
+    color: var(--wb-app-text-primary, #37456E);
+  }
+  .wb-fund-rank-stats {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 134px 110px minmax(0, 1fr);
+    align-items: center;
+    gap: 0;
+    margin-top: 0;
+  }
+  .wb-fund-rank-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .wb-fund-rank-stat-value {
+    font-size: 16px;
+    line-height: 20px;
+    font-weight: 500;
+  }
+  .wb-fund-rank-stat-label {
+    font-size: 12px;
+    line-height: 15px;
+    color: var(--wb-app-text-secondary, #9DA2B3);
+  }
+  /* .wb-fund-gain/.wb-fund-loss now live in components.css */
+  .wb-fund-rank-cta {
+    justify-self: end;
+    align-self: center;
+    background: #F7F9FF;
+    color: var(--wb-app-theme-500, #456CE6);
+    border: none;
+    border-radius: 16px;
+    height: 32px;
+    padding: 0 16px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .wb-fund-rank-cta--wide { padding: 0 12px; }
+
+  /* Compliance disclaimer */
+  .wb-fund-disclaimer {
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--wb-app-text-secondary, #9DA2B3);
+    padding: 16px 12px 0;
+    margin: 0;
+  }
+</style>

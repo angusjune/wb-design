@@ -1,0 +1,140 @@
+/* =============================================================================
+   微众银行APP (WB-APP) Design System — Component Styles
+   Requires tokens.css to be loaded first.
+
+   This file is part of the product profile, not shared machinery: the class
+   names are generic, but the design decisions are this product's.
+
+   Only genuinely cross-screen components live here (confirmed by exact
+   duplicate CSS found across 2+ of the 4 confirmed screens). Anything used by
+   only one screen stays in that screen's own local <style> block.
+   ============================================================================= */
+
+/* =============================================================================
+   PAGE SHELL
+   Presentation-only chrome lives in the active platform pack, not here.
+   ============================================================================= */
+
+.wb-app-page {
+  width: var(--wb-app-page-width, 375px);
+  min-height: 100vh;
+  background: var(--wb-app-bg, #F5F5F5);
+  font-family: var(--wb-app-font-family, -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Noto Sans CJK SC", sans-serif);
+  color: var(--wb-app-text-primary, #37456E);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  margin: 0 auto;
+}
+.wb-app-page-body {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 100px; /* space for fixed bottom bar or tab bar */
+}
+
+/* =============================================================================
+   GAIN / LOSS TEXT COLOR (fund percentage displays)
+   Used on all 4 screens; only 3 defined it locally and 基金排行.html had no
+   definition at all, silently rendering its gain values in the primary text
+   color instead of red. !important is deliberate: this is a single-purpose
+   utility modifier that must win over whatever base "value" class it's
+   paired with (e.g. .wb-fund-list-value), and since components.css always
+   loads before a screen's own local <style> block, equal-specificity source
+   order would otherwise let the base class win instead.
+   ============================================================================= */
+
+.wb-fund-gain { color: var(--wb-app-gain-500, #F24C3D) !important; }
+.wb-fund-loss { color: var(--wb-app-loss-500, #12B38A) !important; }
+
+/* =============================================================================
+   SMALL INLINE TAG (e.g. "0申购费")
+   ============================================================================= */
+
+.wb-fund-tag {
+  background: var(--wb-app-tag-bg, #FFF0E0);
+  color: var(--wb-app-tag-text, #BF7C4D);
+  border-radius: 2px;
+  padding: 1px 4px;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+/* =============================================================================
+   SEARCH BAR (product content, not chrome) — 基金tab.html / 基金排行.html.
+   In source, a trailing icon (收藏/favorite on 基金tab, 客服/support on 基金排行)
+   sits to the right of the search pill, outside it — .wb-fund-searchbar-row
+   holds both; .wb-fund-searchbar-row's margin replaces what used to live on
+   .wb-fund-searchbar itself (基金tab.html overrides margin-top locally since
+   it sits under a large title).
+   ============================================================================= */
+
+.wb-fund-searchbar-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 12px 16px 0;
+}
+
+.wb-fund-searchbar {
+  flex: 1;
+  min-width: 0;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 18px;
+  padding: 0 14px;
+}
+
+.wb-fund-searchbar-trailing {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--wb-app-text-secondary, #9DA2B3);
+}
+.wb-fund-searchbar-placeholder { flex: 1; font-size: 14px; color: rgba(0, 0, 0, 0.35); }
+.wb-fund-searchbar-divider { width: 1px; height: 16px; background: rgba(0, 0, 0, 0.1); }
+.wb-fund-searchbar-action { font-size: 14px; color: var(--wb-app-theme-500, #456CE6); }
+
+/* Figma's small square fund-eligibility mark is shared by discovery cards,
+   leaderboard rows, and the full ranking table. Replace the legacy checkmark
+   placeholders without changing any surrounding text geometry. */
+.wb-fund-preview-name > svg,
+.wb-fund-curated-name > svg,
+.wb-fund-list-title > svg,
+.wb-fund-rank-name > svg {
+  display: none;
+}
+
+.wb-fund-preview-name::after,
+.wb-fund-curated-name::after,
+.wb-fund-list-title::after,
+.wb-fund-rank-name::after {
+  content: "";
+  display: inline-block;
+  flex: 0 0 auto;
+  background: url("/profile/design-system/assets/icon-fund-eligibility.svg") center / 100% 100% no-repeat;
+}
+
+.wb-fund-preview-name::after,
+.wb-fund-curated-name::after {
+  width: 14px;
+  height: 14px;
+}
+
+.wb-fund-list-title::after {
+  width: 16px;
+  height: 16px;
+}
+
+.wb-fund-rank-name::after {
+  width: 17px;
+  height: 17px;
+}

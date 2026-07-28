@@ -1,0 +1,5 @@
+interface:
+  display_name: "Brainstorm 交互方案头脑风暴"
+  short_description: "让你的头脑来一场风暴"
+  policy:
+    allow_implicit_invocation: false

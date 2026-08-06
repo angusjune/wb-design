@@ -20,7 +20,7 @@ WeBank Design 插件包含以下 Skill
 1. 点击侧边栏 `Plugins`
 2. 点击右上角 `Add` -> `Add a marketplace`
 3. 在 Source 中输入 `angusjune/wb-design` 后确认添加
-4. 添加成功后，回到 `Plugins` 页面，切换到 `WeBank Design` Tab，点击 `Add Plugin` 按钮后即可
+4. 添加成功后，回到 `Plugins` 页面，切换到 `Personal` Tab，安装 WeBank Design Plugin 即可
 
 </details>
 

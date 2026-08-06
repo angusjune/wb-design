@@ -1,5 +1,11 @@
 # wb-design
 
+## 0.2.1
+
+### Patch Changes
+
+- 移除不必要的文件及更新 skill 描述
+
 ## 0.2.0
 
 ### Minor Changes

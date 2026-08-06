@@ -64,7 +64,8 @@ codex plugin marketplace add angusjune/wb-design
 
 管理工作区的产品profile：初始化产品profile至当前目录; 根据 Figma URL、截图、现有 HTML、本地实现和文字说明等来源添加生产模板; 修改现有模板、设计语言等。
 
-> [!TIP] Profile 是什么?
+> [!TIP] 
+> **Profile 是什么?**
 > Profile 是 Brainstorm 的产品设计上下文，包含生产页面模板、design token、组件样式和产品规则。建议在每个工作区首次使用时运行一次 `$setup-profile`，Skill会将内置 Profile 复制为 `./wb-design-profile`；之后 Brainstorm 会优先使用这份可编辑副本，你可以根据需要新增、修改设计或模板，而不会被插件更新所覆盖。
 
 #### Prompt 示例
@@ -102,7 +103,8 @@ $brainstorm 给基金详情页增加筛选功能
 $brainstorm 基于这个设计多出几个不同的方案：https://figma.com/design/xxxx
 ```
 
-#### Skill 会做什么
+<details>
+<summary><strong>Skill 会做什么</strong></summary>
 
 当你向 Brainstorm 提出需求时，Skill 会执行以下工作流：
 
@@ -113,7 +115,10 @@ $brainstorm 基于这个设计多出几个不同的方案：https://figma.com/de
 5. **质检**：在交付设计前，内部调用 **Simplify（精简设计）** 以及产品档案声明的 pass，自我修正冗余元素、数值计算错漏及样式缺陷；若当前环境支持（如安装了 Playwright MCP、Chrome DevTools MCP 或其他浏览器自动化工具），还会自动访问页面并截图，完成视觉 QA 自检与纠错。
 6. **选择后续分支**：方案定稿后，Skill 会依次组合反馈、共享 Push to Figma、产品档案声明的分支，以及当前平台包提供的分支，再临时分配选项字母。默认档案可将页面**推送到 Figma 画布**。
 
-#### 效果预览
+</details>
+
+<details>
+<summary><strong>效果预览</strong></summary>
 
 Brainstorm 在对话中澄清设计目标并生成方案：
 
@@ -126,6 +131,7 @@ Brainstorm 在对话中澄清设计目标并生成方案：
 建议使用 GPT 5.6-sol-high 或以上能力的模型。
 实际测试对比 GPT 5.6-luna-medium，sol 在澄清需求及生成质量上有明显提升。
 
+</details>
 
 ### wtf
 

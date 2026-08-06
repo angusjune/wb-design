@@ -1,0 +1,6 @@
+interface:
+  display_name: "Brainstorm 交互方案头脑风暴"
+  short_description: "生成并迭代微众银行 App 设计方案"
+  default_prompt: "在基金详情页中新增筛选功能"
+policy:
+  allow_implicit_invocation: false

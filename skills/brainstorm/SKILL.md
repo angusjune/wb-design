@@ -1,6 +1,6 @@
 ---
 name: brainstorm
-description: 用于基于内置产品档案进行移动端 UI 头脑风暴：生成3个方案、迭代完整流程，并在定稿后继续精简、校验细节、推送 Figma 或构建平台原型；也用于在复制后的 skill 中逐步新建或替换产品档案。Use when exploring or finishing mobile screens with the bundled product profile, or when setting up a new product profile.
+description: 用于基于内置产品档案进行移动端 UI 头脑风暴：生成3个方案、迭代完整流程，并在定稿后继续精简、校验细节、推送 Figma 或构建平台原型。Use when exploring or finishing mobile screens with the bundled product profile, or when setting up a new product profile.
 disable-model-invocation: true
 ---
 

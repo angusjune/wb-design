@@ -8,11 +8,11 @@ tokenPrefix: wb-app
 
 # 微众银行APP (WB-APP) Product Profile
 
-Everything in this file is specific to 微众银行APP 的基金模块. `SKILL.md` holds the method and points here for product facts. The frontmatter above is the machine-readable half of the profile — `scripts/serve-preview.cjs`、`scripts/run-qa-gate.mjs`、`npm run validate` 和站点构建都从这里读取 `platform`、`pageClass`、`tokenPrefix`。
+Everything in this file is specific to 微众银行APP. `SKILL.md` holds the method and points here for product facts. The frontmatter above is the machine-readable half of the profile — `scripts/serve-preview.cjs`、`scripts/run-qa-gate.mjs`、`npm run validate` 和站点构建都从这里读取 `platform`、`pageClass`、`tokenPrefix`。
 
 Read this file at Step 3, before writing any screen HTML.
 
-- **Product:** 微众银行APP (WeBank App) 的基金模块 — 原生 iOS App，非小程序
+- **Product:** 微众银行APP — 原生 iOS App
 - **Page class:** `.wb-app-page` — 每屏都包在这个 class 里
 - **Token prefix:** `--wb-app-*`（这份档案自己的前缀；共享机制不依赖它）
 
@@ -57,9 +57,9 @@ Production-accurate HTML in `profile/screens/`, exported from Figma. **This tabl
 
 ### Principles
 
-1. **红涨绿跌，没有例外。** 所有涨跌幅数字必须用 `.wb-fund-gain`（红 `--wb-app-gain-500`）/`.wb-fund-loss`（绿 `--wb-app-loss-500`），不要凭直觉套用西方的红跌绿涨。
+1. **红涨绿跌，没有例外。** 所有涨跌幅数字必须用 `.wb-fund-gain`（红 `--wb-app-gain-500`）/`.wb-fund-loss`（绿 `--wb-app-loss-500`）。
 2. **千分位分隔符会用。** 大额数字（如管理规模"25,352.42亿"）保留千分位逗号，不要自作主张去掉逗号。
-3. **橙色只留给主流程按钮。** `--wb-app-orange-500` 专用于"购买/定投"这类主要转化动作；蓝色 `--wb-app-theme-500` 用于次级交互（tab 选中、链接、进度条），两者不要混用。
+3. **CTA按钮使用橙色背景。** `--wb-app-orange-500` 用于页面中的CTA按钮；蓝色 `--wb-app-theme-500` 用于次级交互（tab 选中、链接、进度条），两者不要混用。
 4. **卡片圆角 12px，button/tag 圆角 8px。** 
 5. **页面横向留白 12px。**
 6. **导航栏可按屏着色。** 详情页/排行页用深蓝 `#3D60CC` 头部背景 + 白色状态栏图标（通过 `--chrome-navbar-bg`/`--chrome-fg`/`--chrome-tint` 覆盖，见下方"Preview chrome"）；榜单页用红色近似（真透明效果超出共享 chrome 能力范围）。
@@ -91,27 +91,6 @@ Use the platform's own variants:
 ### Screen-specific styles
 
 多屏共用的样式（`.wb-fund-gain`/`.wb-fund-loss`、`.wb-fund-tag`、`.wb-fund-searchbar*`、`.wb-app-page`/`.wb-app-page-body`）都在 `profile/design-system/components.css`；仅属于单个页面的样式留在模板底部的 `<style>` 中。改造模板时必须同时保留其局部样式。
-
----
-
-## Product laws
-
-Non-negotiable. These win over anything a template appears to show.
-
-见上方 Design language → Principles（1–9 条），此处不重复。
-
----
-
-## Passes
-
-无产品专属 QA passes/rule-pack（`profile/quality/` 已删除）。9 条产品铁律中，可机械检查的部分（红涨绿跌、禁止 emoji）已由通用 `scripts/run-qa-gate.mjs` 的 `token-color`/`emoji` 规则覆盖；其余（CTA 配色语义、圆角/留白数值、合规文案覆盖范围）缺乏低误报的静态判断方式，不强行伪装成规则。
-
-## Branches
-
-第 8 步未处理，暂无产品专属分支。
-
-| Branch | Doc | Notes |
-|--------|-----|-------|
 
 ---
 

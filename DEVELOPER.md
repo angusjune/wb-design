@@ -1,23 +1,8 @@
-# Brainstorm 设计 Skill
+# 插件开发说明
 
-交互式设计头脑风暴：澄清需求 → 生成多个方案 → 选择某个方案进行细化。适用于从零设计界面，或探索已有设计的其他可能性。
+## $Brainstorm
 
-内置一套可运行的产品档案，开箱即用。换成别的产品，只需重写 `profile/` 一个目录 —— 见下面的「适配其他产品」。
-
-## 效果预览
-
-Brainstorm 在对话中澄清设计目标并生成方案：
-
-![Brainstorm 对话过程](./screenthot1.png)
-
-在浏览器中并排预览和比较多个设计方向：
-
-![Brainstorm 多方案预览](./screenshot2.png)
-
-建议使用 GPT 5.6-sol-high 或以上能力的模型。
-实际测试对比 GPT 5.6-luna-medium，sol 在澄清需求及生成质量上有明显提升。
-
-## 目录结构
+### 目录结构
 
 分三层。只有第一层是跟产品绑定的。
 
@@ -46,36 +31,9 @@ Brainstorm 在对话中澄清设计目标并生成方案：
 - `scripts/run-qa-gate.mjs`：通用质量检查（产品规则由 `profile/quality/rules.mjs` 提供）。
 - `quality-benchmark/`、`scripts/`、`package.json`：质量基准、维护命令与自测。
 
-## 使用 Skill
+### 开发与测试 Skill
 
-### 如何安装
-
-复制 `./brainstorm` 目录到 `skills` 文件夹下。
-
-### Prompt 示例
-
-```bash
-/brainstorm 帮我为当前产品设计一个新用户引导页
-```
-
-```bash
-/brainstorm 基于这个设计多出几个不同的方案：https://figma.com/design/xxxx
-```
-
-### Skill 会做什么
-
-当你向 Brainstorm 提出需求时，Skill 会执行以下工作流：
-
-1. **澄清需求**：与你进行多轮对话，澄清需求。
-2. **启动本地预览服务**：启动 SSE 热更新的本地 Node 服务（`scripts/serve-preview.cjs`），让你可以在浏览器中实时预览界面修改。预览页右下角可进入批注模式：点手机屏幕内的元素写一句话，Agent 下一轮会读取并直接修改，不用再用文字描述是哪个元素。仅手机屏幕内可批注；顶部导航等平台外壳不可批注。
-3. **基准模板与产品规则对齐**：先读 `profile/PROFILE.md`（模板表、路由、产品铁律、设计语言），再读 `profile/screens/` 的 HTML 模板。针对核心页面，还会通过 `profile/knowledge/README.md` 提取关联的业务逻辑和常见设计坑点，确保设计在视觉和逻辑上都不偏离产品规范。
-4. **生产模板优先的多方案生成**：先复制统一的 `assets/page-template.html` 页面壳，再以最接近的生产模板 DOM 和 class 为起点，只生成各方向真正不同的部分；模板局部 CSS 在同一方案页只保留一份。预览服务会自动链接手机 mockup 样式并注入当前平台包的预览外壳，供用户直观对比。
-5. **质检**：在交付设计前，内部调用 **Simplify（精简设计）** 以及产品档案声明的 pass，自我修正冗余元素、数值计算错漏及样式缺陷；若当前环境支持（如安装了 Playwright MCP、Chrome DevTools MCP 或其他浏览器自动化工具），还会自动访问页面并截图，完成真正的视觉 QA 自检与纠错。
-6. **选择后续分支**：方案定稿后，Skill 会依次组合反馈、共享 Push to Figma、产品档案声明的分支，以及当前平台包提供的分支，再临时分配选项字母。默认档案可将页面**推送到 Figma 画布**，或通过平台分支**生成微信小程序 Demo**。
-
-## 开发与测试 Skill
-
-### 修改后
+#### 修改后
 
 `quality-benchmark/` 用来评估 `brainstorm` 的真实产出质量，不是日常使用流程的一部分。适合在修改 `SKILL.md`、生产模板、设计资产、pass/分支流程或 `scripts/run-qa-gate.mjs` 后运行，用于比较改动前后的 gate 数字和截图表现；只改普通说明文档时通常不需要。
 
@@ -105,7 +63,7 @@ npm test
 npm run session:report -- /path/to/session/state
 ```
 
-### 发布前
+#### 发布前
 
 上传或分发本目录前，运行：
 
@@ -120,11 +78,11 @@ npm run validate
 - `SKILL.md`、产品档案文档、共享引用和各层分支文档中只引用本目录内文件。
 - 目录体积小于 100MB。
 
-## 适配其他产品
+### 适配其他产品
 
 **重写 `profile/` 目录就行**，你可以选择 AI 辅助或人工重写：
 
-### AI 辅助适配
+#### AI 辅助适配
 
 Prompt：
 
@@ -132,7 +90,7 @@ Prompt：
 请读取 `@references/setup-profile.md`，然后开始建立新的产品档案。
 ```
 
-### 人工适配
+#### 人工适配
 
 详细说明见 `profile/README.md`。按重要性排序，前两项决定输出质量：
 

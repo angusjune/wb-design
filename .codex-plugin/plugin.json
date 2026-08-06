@@ -1,0 +1,25 @@
+{
+  "name": "wb-design",
+  "version": "0.1.1",
+  "description": "基于微众银行 App 产品档案与现有界面，生成、比较并迭代多个移动端 UI 设计方案。",
+  "author": {
+    "name": "anguszhu"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "WeBank Design",
+    "shortDescription": "生成并迭代微众银行 App 设计方案",
+    "longDescription": "基于内置的微众银行 App 产品档案、现有界面或文字需求，生成多个差异化的移动端 UI 方案，通过浏览器实时预览进行比较和迭代，并支持定稿后的细节校验、Figma 推送与微信小程序原型构建。",
+    "developerName": "anguszhu",
+    "category": "Design",
+    "capabilities": ["Read", "Write"],
+    "defaultPrompt": [
+      "在基金详情页中新增筛选功能",
+      "基于这个设计多出几个不同的方案：https://figma.com/design/xxxx"
+    ],
+    "brandColor": "#456CE6",
+    "composerIcon": "./assets/composer-icon.png",
+    "logo": "./assets/logo.png",
+    "screenshots": ["./assets/screenshot1.png", "./assets/screenshot2.png"]
+  }
+}

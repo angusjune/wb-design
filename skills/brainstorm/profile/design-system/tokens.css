@@ -1,8 +1,6 @@
 /* =============================================================================
    微众银行APP (WB-APP) Design System — Design Tokens
    Copy this file into your project as-is, or extract the relevant sections.
-   Source: Figma variables bound to the confirmed screens, plus the file's own
-   "tokens-color" reference sheet (node 3002:4228) — not eyeballed from renders.
    ============================================================================= */
 
 :root {
@@ -10,7 +8,7 @@
 
   /* Primary (主色) */
   --wb-app-theme-500: #456CE6;        /* 主色/蓝 — module buttons, text links, tab-selected, progress bars */
-  --wb-app-orange-500: #F99C4B;       /* 主色/橙 — primary-flow CTA buttons (购买/定投), emphasis text */
+  --wb-app-orange-500: #F99C4B;       /* 主色/橙 — primary-flow CTA buttons, emphasis text */
 
   /* Text (文本色) */
   --wb-app-text-primary: #37456E;     /* 一级文本色 */
@@ -30,8 +28,7 @@
   --wb-app-notify-bg: #FFF0D2;
 
   /* Gradients — 银行卡背景色 (bank-card backgrounds). Not used by the 4 confirmed
-     screens yet; captured from the reference sheet for screens added later.
-     Angle isn't given by the sheet (stops only) — 135deg is an assumption. */
+     screens yet; captured from the reference sheet for screens added later. */
   --wb-app-card-webank: linear-gradient(135deg, #456CE6, #3D60CC);   /* 微众卡 */
   --wb-app-card-add: linear-gradient(135deg, #C6CCDB, #B8BED0);      /* 添加银行卡 */
   --wb-app-card-red: linear-gradient(135deg, #E65050, #D94C4C);      /* 红卡 */

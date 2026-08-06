@@ -1,5 +1,29 @@
 # 插件开发说明
 
+## Changelog 与版本
+
+插件以仓库根目录的 `package.json` 为唯一版本来源，`.codex-plugin/plugin.json` 会在版本更新时自动同步。`skills/brainstorm/package.json` 只保留该 Skill 的维护命令，不单独维护版本。
+
+每个会影响用户的改动都要在仓库根目录添加 changeset：
+
+```bash
+npm run changeset
+```
+
+选择 `patch`、`minor` 或 `major`，并填写可直接进入 changelog 的变更说明。提交命令生成的 `.changeset/*.md` 文件。
+
+准备新版本时，在仓库根目录运行：
+
+```bash
+npm run version-packages
+```
+
+该命令会消费未发布的 changeset，更新根 `package.json` 与 `CHANGELOG.md`，并将相同版本写入 `.codex-plugin/plugin.json`。检查版本是否一致：
+
+```bash
+npm run check:version
+```
+
 ## $Brainstorm
 
 ### 目录结构
@@ -49,7 +73,7 @@ npm run benchmark:report -- profile/quality/benchmark/runs/<version>
 npm run benchmark:report -- profile/quality/benchmark/runs/<new> --compare profile/quality/benchmark/runs/baseline
 ```
 
-本目录内的自测命令：
+仓库根目录的自测命令：
 
 ```bash
 npm test
@@ -65,7 +89,7 @@ npm run session:report -- /path/to/session/state
 
 #### 发布前
 
-上传或分发本目录前，运行：
+上传或分发前，在仓库根目录运行：
 
 ```bash
 npm run validate

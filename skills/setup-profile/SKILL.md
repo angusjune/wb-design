@@ -1,16 +1,17 @@
 ---
 name: setup-profile
-description: Sets up the WB design profile. Use when the user wants to copy or initialize the bundled profile in the current workspace, or add and import HTML screen templates from Figma URLs, screenshots, existing HTML, or other supplied design sources. Also use when Brainstorm needs a workspace profile before template customization.
+description: Manages the WB design workspace profile. Use when the user wants to initialize it from the bundled profile, add HTML screen templates from supplied design sources, or edit templates or other files already in the workspace profile. Also use when Brainstorm needs a workspace profile before customization.
 ---
 
 # Setup Profile
 
 Resolve this skill directory as `setupSkillDir`, the current project root as `workspaceDir`, and the sibling Brainstorm skill as `brainstormSkillDir = setupSkillDir/../brainstorm`. The workspace profile always lives at `workspaceDir/wb-design-profile`.
 
-Choose exactly one branch from the user's request:
+Choose exactly one branch from the user's request. If user runs the skill with no other prompt, choose **Copy profile** branch:
 
 - **Copy profile** — create the workspace profile from Brainstorm's bundled profile.
 - **Add templates** — add one or more supplied designs to the workspace profile. This branch first creates the workspace profile when it is absent.
+- **Edit profile files** — modify existing templates or other files in the workspace profile. This branch first creates the workspace profile when it is absent.
 
 An existing workspace profile may be incomplete. Treat the copy script's `incomplete` status as diagnostics, not automatic failure: inspect the files that do exist and continue whenever the requested branch can still meet its completion criterion. Do not silently mix bundled files into the workspace profile.
 
@@ -38,3 +39,31 @@ The script preserves an existing workspace profile. It reports `incomplete` plus
 First run the copy command above. Read [`references/add-templates.md`](references/add-templates.md) completely and execute its source-to-template workflow for every design the user requested. If the command reports `incomplete`, use the available workspace files and source evidence first; invoke the choice above only when a missing or invalid entry prevents the template from being created, registered, validated, or previewed.
 
 **Completion criterion:** every requested screen has a confirmed HTML template under `wb-design-profile/screens/`; its local assets resolve; `PROFILE.md` lists and routes it; profile validation and the QA gate pass; and the user has reviewed the rendered result.
+
+## Edit templates or other profile files
+
+First run the copy command above. Resolve every requested target inside `<workspaceDir>/wb-design-profile`, then read each target completely before editing it. Also inspect the profile files that define or consume the target:
+
+- For a screen template, read `PROFILE.md`, the active design-system styles, referenced local assets, and any related templates needed to preserve established patterns.
+- For a shared file such as `PROFILE.md`, a token, component, asset, product-knowledge file, quality pass, or platform file, search the workspace profile for every reference and inspect each affected consumer.
+
+Apply the requested changes only to the workspace profile and preserve unrelated content. Keep the bundled profile untouched. When a change adds, renames, or removes a screen, asset, token, class, rule, or route, update every affected workspace-profile reference in the same edit.
+
+Run the workspace profile validator after all edits:
+
+```bash
+node "<brainstormSkillDir>/scripts/validate-skill.mjs" \
+  --profile "<workspaceDir>/wb-design-profile"
+```
+
+For every changed or affected HTML template, also run the QA gate:
+
+```bash
+node "<brainstormSkillDir>/scripts/run-qa-gate.mjs" \
+  --profile "<workspaceDir>/wb-design-profile" \
+  "<workspaceDir>/wb-design-profile/screens/<template>.html"
+```
+
+Then start `brainstormSkillDir/scripts/serve-preview.cjs --project-dir "<workspaceDir>"`. Use its returned `screenDir` to prepare a preview document from `brainstormSkillDir/assets/page-template.html`, inserting the template's fragment markup and trailing style block at the marked placeholders. Inspect the rendered result for the user's requested change and regressions; apply corrections and rerun the affected checks until they pass.
+
+**Completion criterion:** the requested workspace-profile files contain the change; every affected reference and consumer remains consistent; profile validation and every applicable template QA check pass; and every visual change has been verified in the rendered preview.

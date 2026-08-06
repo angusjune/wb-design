@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "wb-design",
+  "displayName": "WeBank Design",
+  "version": "0.2.0",
+  "description": "微众银行 App 设计工具箱",
+  "author": {
+    "name": "anguszhu"
+  },
+  "homepage": "https://github.com/angusjune/wb-design",
+  "repository": "https://github.com/angusjune/wb-design",
+  "license": "MIT",
+  "skills": [
+    "./skills/brainstorm",
+    "./skills/setup-profile"
+  ]
+}

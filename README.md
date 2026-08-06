@@ -1,32 +1,104 @@
+<img alt="Skills" src="./assets/logo.png" width="128">
+
 # WeBank Design 插件
+
+WeBank Design 插件包含以下 Skill
+
+| Skill | 使用场景 |
+|------|--------|
+| setup-profile | 需要初始化、修改、新增页面模板、设计组件、design token 等文件时使用 |
+| brainstorm | 从零设计界面，或探索已有设计的其他可能性 |
+| wtf | 你听不懂 AI 在说什么，让它用简明易懂的语言复述一遍 |
+
+更新记录见 [CHANGELOG.md](CHANGELOG.md)
 
 ## 如何安装
 
-在 Codex Desktop 中安装 WeBank Design 插件。插件同时提供 `brainstorm` 与 `setup-profile` 两个 Skill；插件更新时，内置产品档案也会随插件版本更新。
+<details>
+<summary><strong>Codex Desktop</strong></summary>
 
-如果要在某个工作区维护自己的产品档案，先运行：
+1. 点击侧边栏 `Plugins`
+2. 点击右上角 `Add` -> `Add a marketplace`
+3. 在 Source 中输入 `angusjune/wb-design` 后确认添加
+4. 添加成功后，回到 `Plugins` 页面，切换到 `WeBank Design` Tab，点击 `Add Plugin` 按钮后即可
 
-```text
-$setup-profile 将内置产品档案复制到当前工作区
+</details>
+
+<details>
+<summary><strong>Codex CLI</strong></summary>
+
+1. 在终端中运行
+```bash
+codex plugin marketplace add angusjune/wb-design
 ```
 
-它会创建固定目录 `./wb-design-profile`，且不会覆盖已经存在的工作区档案。之后 `brainstorm` 会优先使用这个工作区档案；目录不存在时使用插件内置档案。
+2. 进入 codex session 后运行 `/plugins` 后选择 `WeBank Design` 安装
 
-工作区档案不完整时，Brainstorm 会先报告缺失项，并尽量使用已有模板、设计资产和用户提供的设计来源继续当前任务。只有缺失项确实阻止生成、校验或预览时，才会让用户选择：本次改用内置档案，或先补齐工作区档案。修复操作只复制缺失的内置文件，不覆盖已有自定义内容。
+</details>
+
+<details>
+<summary><strong>Claude Code</strong></summary>
+
+1. 在 Claude Code session 中运行
+```bash
+/plugin marketplace add angusjune/wb-design
+```
+
+2. 选择 `wb-design`，然后重新加载插件：
+```bash
+/reload-plugins
+```
+
+</details>
+
+<details>
+<summary><strong>手动安装</strong></summary>
+
+如果你不希望使用plugin生态, 或想手动修改skill, 可直接下载repo, 直接 `skills/` 文件夹内的skill即可
+
+</details>
 
 ## Skill 详情
 
-### `brainstorm`
+### setup-profile
+
+管理工作区的产品profile：初始化产品profile至当前目录; 根据 Figma URL、截图、现有 HTML、本地实现和文字说明等来源添加生产模板; 修改现有模板、设计语言等。
+
+> [!TIP] Profile 是什么?
+> Profile 是 Brainstorm 的产品设计上下文，包含生产页面模板、design token、组件样式和产品规则。建议在每个工作区首次使用时运行一次 `$setup-profile`，Skill会将内置 Profile 复制为 `./wb-design-profile`；之后 Brainstorm 会优先使用这份可编辑副本，你可以根据需要新增、修改设计或模板，而不会被插件更新所覆盖。
+
+#### Prompt 示例
+
+```bash
+# 初始化产品profile, 建议首次使用时都运行一次
+$setup-profile
+```
+
+```bash
+# 新增页面模板
+$setup-profile 根据这个 Figma 添加页面模板：https://figma.com/design/xxxx
+$setup-profile 根据我附上的截图添加页面模板
+$setup-profile 根据iPhone Mirroring中运行的app添加页面模板
+```
+
+```bash
+# 修改design token
+$setup-profile 修改页面主题色为#ff0000
+```
+
+### brainstorm
 
 交互式设计头脑风暴：澄清需求 → 生成多个方案 → 选择某个方案进行细化。适用于从零设计界面，或探索已有设计的其他可能性。
 
 #### Prompt 示例
 
-```text
+```bash
+# 从零设计界面
 $brainstorm 给基金详情页增加筛选功能
 ```
 
-```text
+```bash
+# 探索已有设计的其他可能性
 $brainstorm 基于这个设计多出几个不同的方案：https://figma.com/design/xxxx
 ```
 
@@ -45,7 +117,7 @@ $brainstorm 基于这个设计多出几个不同的方案：https://figma.com/de
 
 Brainstorm 在对话中澄清设计目标并生成方案：
 
-![Brainstorm 对话过程](assets/screenthot1.png)
+![Brainstorm 对话过程](assets/screenshot1.png)
 
 在浏览器中并排预览和比较多个设计方向：
 
@@ -54,27 +126,18 @@ Brainstorm 在对话中澄清设计目标并生成方案：
 建议使用 GPT 5.6-sol-high 或以上能力的模型。
 实际测试对比 GPT 5.6-luna-medium，sol 在澄清需求及生成质量上有明显提升。
 
-### `setup-profile`
 
-管理当前工作区的产品档案：复制插件内置档案，或根据 Figma URL、截图、现有 HTML、本地实现和文字说明等来源添加生产模板。
+### wtf
+
+你听不懂刚刚 AI 在说什么，让它用简明易懂的语言复述一遍
 
 #### Prompt 示例
 
-```text
-$setup-profile 将内置产品档案复制到当前工作区
+```bash
+# 直接调用即可, 不需要其他prompt
+$wtf
 ```
-
-```text
-$setup-profile 根据这个 Figma 节点添加一个基金筛选页模板：https://figma.com/design/xxxx
-```
-
-```text
-$setup-profile 根据我附上的截图添加页面模板
-```
-
-添加模板时，如果 `./wb-design-profile` 尚不存在，Skill 会先复制内置档案；新增 HTML、静态资源和 `PROFILE.md` 模板路由都只写入工作区副本，因此插件更新不会覆盖用户自定义内容。
-
 
 ## 插件开发说明
 
-见[DEVELOPER.md](DEVELOPER.md)
+见 [DEVELOPER.md](DEVELOPER.md)。

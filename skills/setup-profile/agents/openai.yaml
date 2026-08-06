@@ -1,4 +1,4 @@
 interface:
-  display_name: "设置产品档案"
-  short_description: "将内置产品档案复制到工作区，并从设计来源添加页面模板"
-  default_prompt: "使用 $setup-profile 将内置产品档案复制到当前工作区。"
+  display_name: "Setup profile 设置产品档案"
+  short_description: "初始化、修改、新增页面模板、设计组件、design token 等文件"
+  default_prompt: "使用 $setup-profile 在当前工作区初始化或编辑产品档案。"

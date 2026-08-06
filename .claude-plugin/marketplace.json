@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "wb-design",
+  "metadata": {
+    "description": "微众银行 App 设计工具箱"
+  },
+  "owner": {
+    "name": "anguszhu"
+  },
+  "plugins": [
+    {
+      "name": "wb-design",
+      "source": "./",
+      "version": "0.2.0",
+      "category": "design"
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+interface:
+  display_name: "What the F*ck"
+  short_description: "用简明易懂的语言重述一遍"
+policy:
+  allow_implicit_invocation: false

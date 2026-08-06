@@ -1,7 +1,7 @@
 {
   "name": "wb-design",
-  "version": "0.1.1",
-  "description": "基于微众银行 App 产品档案与现有界面生成、比较并迭代移动端 UI 方案，并支持工作区产品档案与自定义 HTML 模板。",
+  "version": "0.2.0",
+  "description": "微众银行 App 设计工具箱",
   "author": {
     "name": "anguszhu"
   },

@@ -6,7 +6,7 @@
 
 分三层。只有第一层是跟产品绑定的。
 
-**产品档案 `profile/`** —— 换产品时你唯一要重写的目录
+**产品档案** —— 内置默认档案在 `profile/`；用户可通过 `setup-profile` 在项目根目录创建 `wb-design-profile/`
 
 - `PROFILE.md`：模板表、路由表、产品铁律、设计语言、passes、可选 Branches 表与速查表。Step 3 会读它；文件头部的 frontmatter 是脚本读的配置（产品、平台、page class）。
 - `branches/`：产品专属的后续分支文档（可选）；只需在 `PROFILE.md` 的 Branches 表中声明，不用修改 `SKILL.md`。
@@ -24,7 +24,7 @@
 
 **通用机制** —— 不认识任何产品和平台
 
-- `SKILL.md`：主流程（澄清 → 多方案 → 精简 → 质检 → 定稿 → 分支）。
+- `SKILL.md`：主流程（选择工作区或内置档案 → 澄清 → 多方案 → 精简 → 质检 → 定稿 → 分支）。
 - `assets/`：规范页面壳 `page-template.html`，以及由预览服务自动链接的展示样式 `frame.css`、热更新和批注资源。
 - `references/`：方案发散方法与共享 Push to Figma 分支；通用 Simplify pass 已内联在 `SKILL.md`。
 - `scripts/serve-preview.cjs`、`assets/live-reload.js`、`assets/annotate.js`：本地热更新预览服务，以及浏览器端 SSE 与点选批注客户端。
@@ -78,11 +78,17 @@ npm run validate
 - `SKILL.md`、产品档案文档、共享引用和各层分支文档中只引用本目录内文件。
 - 目录体积小于 100MB。
 
-### 适配其他产品
+### 管理工作区产品档案
+
+日常使用不要修改已安装插件中的 `profile/`。运行 `$setup-profile` 将内置档案复制到当前项目的固定目录 `./wb-design-profile`；目录存在时 `brainstorm` 会优先选择它，即使它不完整，并把缺失项作为任务级诊断。只有当前任务无法继续时，才由用户选择本次改用内置档案或先补齐工作区档案。插件更新不会覆盖这个工作区目录。
+
+要根据 Figma URL、截图、现有 HTML 或其他设计来源增加页面模板，同样使用 `$setup-profile`。如果工作区档案尚不存在，它会先复制；随后添加模板、所需静态资源，并同步更新工作区 `PROFILE.md` 的模板清单与路由。
+
+### 维护内置默认档案
 
 **重写 `profile/` 目录就行**，你可以选择 AI 辅助或人工重写：
 
-#### AI 辅助适配
+#### AI 辅助完整适配
 
 Prompt：
 

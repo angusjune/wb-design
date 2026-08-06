@@ -24,8 +24,10 @@ function makeFixture() {
   return fixtureRoot;
 }
 
-function runValidator(fixtureRoot) {
-  const result = spawnSync(process.execPath, ['scripts/validate-skill.mjs', '--json'], {
+function runValidator(fixtureRoot, profileDir = null) {
+  const args = ['scripts/validate-skill.mjs', '--json'];
+  if (profileDir) args.push('--profile', profileDir);
+  const result = spawnSync(process.execPath, args, {
     cwd: fixtureRoot,
     encoding: 'utf8',
   });
@@ -40,10 +42,12 @@ function addProfileBranchRow(fixtureRoot, docPath) {
   const profilePath = path.join(fixtureRoot, 'profile', 'PROFILE.md');
   const profile = fs.readFileSync(profilePath, 'utf8');
   const header = '|--------|-----|-------|';
-  assert.ok(profile.includes(header));
+  const row = `| Export handoff | \`${docPath}\` | Fixture branch. |`;
   fs.writeFileSync(
     profilePath,
-    profile.replace(header, `${header}\n| Export handoff | \`${docPath}\` | Fixture branch. |`),
+    profile.includes(header)
+      ? profile.replace(header, `${header}\n${row}`)
+      : `${profile.trimEnd()}\n\n## Branches\n\n| Branch | Doc | Notes |\n${header}\n${row}\n`,
   );
 }
 
@@ -120,6 +124,28 @@ describe('shared page template validation', () => {
     assert.ok(
       result.report.errors.includes(
         'assets/frame.css 必须只包含 CSS，不能包含 HTML 页面壳',
+      ),
+    );
+  });
+});
+
+describe('workspace profile validation', () => {
+  test('checks the profile passed through the selection seam', () => {
+    const fixtureRoot = makeFixture();
+    const workspaceProfile = path.join(path.dirname(fixtureRoot), 'wb-design-profile');
+    fs.cpSync(path.join(fixtureRoot, 'profile'), workspaceProfile, { recursive: true });
+    fs.writeFileSync(
+      path.join(workspaceProfile, 'screens', '新增模板.html'),
+      '<div class="wb-app-page"></div>\n',
+    );
+
+    const result = runValidator(fixtureRoot, workspaceProfile);
+
+    assert.equal(result.stderr, '');
+    assert.equal(result.exitCode, 1);
+    assert.ok(
+      result.report.errors.includes(
+        '模板存在但未在 profile/PROFILE.md 列出: profile/screens/新增模板.html',
       ),
     );
   });

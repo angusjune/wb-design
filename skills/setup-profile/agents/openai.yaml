@@ -1,0 +1,4 @@
+interface:
+  display_name: "设置产品档案"
+  short_description: "将内置产品档案复制到工作区，并从设计来源添加页面模板"
+  default_prompt: "使用 $setup-profile 将内置产品档案复制到当前工作区。"

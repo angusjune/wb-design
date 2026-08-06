@@ -1,10 +1,10 @@
 # Brainstorm Skill 维护指南
 
-本目录是可单独复制、上传和运行的 publishable skill directory。维护目标不是做多产品配置系统，而是让另一个团队复制本目录后，只替换 `profile/` 就能得到自己的版本。
+本目录是可单独复制、上传和运行的 publishable skill directory。`profile/` 是内置默认档案；运行时只允许通过固定 seam 选择项目根目录的 `wb-design-profile/`。工作区档案存在时即选中并尽力使用，完整性问题作为任务级诊断。这不是多产品配置系统：一次运行始终只有一个选中的产品档案。
 
 ## 先守住三层边界
 
-- `profile/` 是产品档案：产品名、设计 token、组件、生产模板、业务规则、产品工具和产品基准数据只能放这里。换产品时只重写这个目录。
+- `profile/` 是内置默认产品档案：产品名、设计 token、组件、生产模板、业务规则、产品工具和产品基准数据只能放在产品档案内。项目自定义内容由同级 `setup-profile` Skill 写入工作区 `wb-design-profile/`。
 - `platforms/` 是平台包：只放某个平台共有的预览外壳、平台分支和工具链，不得写死产品名、产品 class 或 token 前缀。
 - 其余目录是通用机制：不得出现产品名，也不得假设微信、iOS 等具体平台。
 
@@ -12,8 +12,8 @@
 
 - 不要引入外部 git、submodule 或需要同步的上游仓库；本目录必须自包含。
 - 用户会看到的说明和文案使用中文。
-- 不要增加 active profile、profile selector 或生成 `SKILL.md` 的模板系统。每份 skill 永远只有一个 `profile/`。
-- 移动或重命名文件时，同时更新 `SKILL.md`、`README.md`、`package.json`、测试、ADR 和站点脚本中的路径引用。
+- 不要增加任意路径、命名档案、配置注册表或生成 `SKILL.md` 的模板系统。唯一允许的选择 seam 是：存在的 `<projectDir>/wb-design-profile` 优先，否则使用内置 `profile/`。不完整的工作区档案要返回诊断并尽力运行；只有当前任务确实不可完成时才让用户选择 `--use-bundled-profile` 或先修复工作区，不能静默混用两份档案。
+- 移动或重命名文件时，同时更新 `SKILL.md`、仓库根使用说明、`package.json`、测试、ADR 和站点脚本中的路径引用。
 
 ## 目录地图
 
@@ -21,12 +21,11 @@
 brainstorm/
 ├── SKILL.md                 # Agent 执行的主方法与通用 Simplify pass；保持产品、平台中立
 ├── AGENTS.md                # 本维护指南
-├── README.md                # 中文使用与维护说明
 ├── package.json             # 维护命令入口
 ├── assets/                  # 通用展示资源；预览服务自动注入
 ├── references/              # 按需读取的通用方法与分支说明
 ├── scripts/                 # 通用运行、检查、遥测和自测脚本
-├── profile/                 # 唯一的产品档案；换产品只改这里
+├── profile/                 # 内置默认产品档案
 ├── platforms/               # 平台包；由 PROFILE.md 的 platform 选择
 └── quality-benchmark/       # 通用基准报告器；产品基准数据在 profile/ 下
 ```
@@ -38,7 +37,7 @@ brainstorm/
 - `assets/live-reload.js`：浏览器端 SSE 热更新客户端；由预览服务注入。
 - `assets/annotate.js`：浏览器端点选批注客户端；由预览服务注入。
 - `references/solution-archetypes.md`：三方案发散策略。
-- `references/setup-profile.md`：AI Agent 新建或替换产品档案时使用的逐步交互向导。
+- `references/setup-profile.md`：维护者完整新建或替换内置产品档案时使用的逐步交互向导；用户工作区的复制与增量模板由同级 `setup-profile` Skill 负责。
 - `references/branches/push-to-figma.md`：所有产品和平台共用的 Push to Figma 分支。
 - `profile/PROFILE.md`：产品档案入口；frontmatter 给脚本读，正文给 Agent 读。
 - `profile/branches/`：可选的产品专属 Step 6 分支；必须在 `PROFILE.md` 的 Branches 表中声明。
@@ -56,13 +55,14 @@ brainstorm/
 
 | 路径 | 职责 | 何时修改 |
 |---|---|---|
-| `scripts/serve-preview.cjs` | 启动本地预览服务；创建会话目录、挂载 `/assets/`、`/profile/`、`/platform/`，展开 `<preview-chrome>`，注入展示样式、热更新和点选批注客户端，并记录会话事件。 | 修改预览协议、挂载点、平台外壳展开或会话生命周期时。 |
+| `scripts/serve-preview.cjs` | 启动本地预览服务；选择固定工作区 seam 或内置档案，创建会话目录、挂载 `/assets/`、`/profile/`、`/platform/`，展开 `<preview-chrome>`，注入展示样式、热更新和点选批注客户端，并记录会话事件。 | 修改档案选择、预览协议、挂载点、平台外壳展开或会话生命周期时。 |
 | `scripts/acknowledge-annotations.cjs` | 在 Agent 应用批注后显式确认本轮实际读取到的最后一个 ID；文件写入本身不会消费批注。 | 修改批注 pending/consumed 协议时。 |
 | `scripts/run-qa-gate.mjs` | 对生成 HTML 跑确定性通用检查，并按约定加载可选的 `profile/quality/rules.mjs`。 | 新增所有产品都成立的机械规则时；产品规则不要写进这里。 |
 | `scripts/report-session-telemetry.mjs` | 汇总某次会话的 `session-events.jsonl`，输出生成、QA、预览等阶段耗时。 | 遥测 schema 或分析指标变化时。 |
 | `scripts/validate-skill.mjs` | 检查 skill 自包含性、禁带文件、文档路径、目录体积、模板清单和静态资源引用。 | 增加新的结构约定或发布门禁时。 |
 | `scripts/lib/session-telemetry.cjs` | 共享事件名、JSONL 写入和会话目录发现逻辑；不是独立 CLI。 | 预览、QA、报告器共同需要新的事件字段时。 |
 | `scripts/lib/annotations.cjs` | 共享批注校验、JSONL 读写、显式确认和 pending 推导逻辑；不是独立 CLI。 | 修改批注 schema、长度限制或确认协议时。 |
+| `scripts/lib/profile-selection.cjs` | 实现唯一的产品档案选择 seam：存在的工作区 `wb-design-profile/` 优先并返回完整性诊断；支持用户明确选择内置 `profile/`。 | 修改固定 seam 的诊断、内置覆盖或服务集成时。 |
 | `scripts/tests/qa-gate.mjs` | 校准 QA fixtures，并要求所有生产模板零 error。 | 修改 QA gate、产品规则或模板时。 |
 | `scripts/tests/session-telemetry.mjs` | 用真实预览服务、文件监听、HTTP 和 QA CLI 做遥测集成测试。 | 修改预览或遥测链路时。 |
 | `scripts/tests/annotations.mjs` | 用真实预览服务、HTTP、文件监听和确认 CLI 校验点选批注链路。 | 修改批注客户端、接口或 pending/consumed 协议时。 |
@@ -142,7 +142,7 @@ bun test
 提交前再搜索一次旧路径和越界知识：
 
 ```bash
-rg -n "serve-preview|run-qa-gate|profile/|platforms/" SKILL.md README.md package.json scripts quality-benchmark
+rg -n "serve-preview|run-qa-gate|profile/|platforms/" SKILL.md package.json scripts quality-benchmark
 rg -n "旧产品名|旧前缀" . --glob '!profile/**'
 ```
 

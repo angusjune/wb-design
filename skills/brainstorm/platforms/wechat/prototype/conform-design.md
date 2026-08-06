@@ -72,8 +72,11 @@ status bar). `manifest.json` shape:
 **Render a brainstorm HTML screen to a ref PNG** (when there is no Figma export):
 
 ```bash
-node "platforms/wechat/prototype/render-html-reference.mjs" <input.html> <out.png>
+node "platforms/wechat/prototype/render-html-reference.mjs" <input.html> <out.png> \
+  --profile "<profileDir>"
 ```
+
+`profileDir` is the profile selected by Brainstorm's preview server for this session, so workspace templates and assets remain the rendering source of truth.
 
 **Figma reference path:** alternatively save a Figma MCP `get_screenshot` result
 directly to `<project>/.conform/ref/<screen>.png` (screen-only, 375 px wide).

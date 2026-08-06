@@ -16,7 +16,7 @@
  *   6. Root-absolute src/href in screen templates resolve through a server mount.
  *   7. The canonical page scaffold and preview-frame stylesheet keep their contract.
  *
- * Usage: node scripts/validate-skill.mjs [--json]
+ * Usage: node scripts/validate-skill.mjs [--json] [--profile <dir>]
  */
 
 import fs from 'node:fs';
@@ -25,6 +25,19 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
+
+const argv = process.argv.slice(2);
+const json = argv.includes('--json');
+let activeProfileDir = path.join(ROOT, 'profile');
+for (let index = 0; index < argv.length; index += 1) {
+  if (argv[index] !== '--profile') continue;
+  if (!argv[index + 1]) {
+    console.error('Usage: node scripts/validate-skill.mjs [--json] [--profile <dir>]');
+    process.exit(2);
+  }
+  activeProfileDir = path.resolve(argv[index + 1]);
+  index += 1;
+}
 
 const FORBIDDEN = ['.git', 'node_modules', '.env', '__pycache__', '.DS_Store'];
 const SIZE_LIMIT_BYTES = 100 * 1024 * 1024;
@@ -194,8 +207,8 @@ for (const docPath of docsToScan) {
 // Check 5: profile/PROFILE.md screen table <-> profile/screens/ (both directions).
 // PROFILE.md names templates and nothing else, so every .html it mentions must
 // exist and vice versa — no need to guess which names are templates.
-const screensDir = path.join(ROOT, 'profile', 'screens');
-const profileDoc = path.join(ROOT, 'profile', 'PROFILE.md');
+const screensDir = path.join(activeProfileDir, 'screens');
+const profileDoc = path.join(activeProfileDir, 'PROFILE.md');
 if (!fs.existsSync(screensDir)) {
   errors.push('缺少 profile/screens/ 目录');
 } else if (!fs.existsSync(profileDoc)) {
@@ -236,7 +249,7 @@ if (fs.existsSync(screensDir)) {
   // The profile's machine-readable config is PROFILE.md's frontmatter block.
   const profileConfig = (() => {
     try {
-      const text = fs.readFileSync(path.join(ROOT, 'profile', 'PROFILE.md'), 'utf8');
+      const text = fs.readFileSync(profileDoc, 'utf8');
       const block = text.match(/^---\n([\s\S]*?)\n---/);
       const config = {};
       for (const line of (block ? block[1] : '').split('\n')) {
@@ -250,7 +263,7 @@ if (fs.existsSync(screensDir)) {
   })();
   const mounts = {
     '/assets/': path.join(ROOT, 'assets'),
-    '/profile/': path.join(ROOT, 'profile'),
+    '/profile/': activeProfileDir,
     ...(profileConfig.platform
       ? { '/platform/': path.join(ROOT, 'platforms', profileConfig.platform) }
       : {}),
@@ -277,7 +290,6 @@ if (fs.existsSync(screensDir)) {
   notes.push(`screen asset refs: ${refCount} 个绝对路径引用已校验`);
 }
 
-const json = process.argv.includes('--json');
 if (json) {
   console.log(JSON.stringify({ ok: errors.length === 0, errors, notes, sizeMB: +(totalBytes / 1024 / 1024).toFixed(2) }, null, 2));
 } else {

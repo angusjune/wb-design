@@ -1,18 +1,17 @@
 ---
 name: brainstorm
-description: 用于基于内置产品档案进行移动端 UI 头脑风暴：生成3个方案、迭代完整流程，并在定稿后继续精简、校验细节、推送 Figma 或构建平台原型。Use when exploring or finishing mobile screens with the bundled product profile, or when setting up a new product profile.
-disable-model-invocation: true
+description: 用于基于当前产品档案进行移动端 UI 头脑风暴：生成3个方案、迭代完整流程，并在定稿后继续精简、校验细节、推送 Figma 或构建平台原型。Use when exploring or finishing mobile screens with the active workspace or bundled product profile.
 ---
 
 # Design Brainstorm
 
 Interactive design and finishing workflow for mobile screens. Users describe ideas, compare solution options in phone mockups, pick a direction, iterate via terminal feedback with live hot-reload preview, then choose whether to keep editing, push to Figma, or build a platform prototype.
 
-Resolve this skill directory as `skillDir`. Every path below is relative to `skillDir`; this directory is self-contained for upload.
+Resolve this skill directory as `skillDir` and the current project root as `projectDir`. The preview server selects `projectDir/wb-design-profile` whenever that directory exists, even when incomplete; otherwise it selects `skillDir/profile`. Save the selected `profileDir` and its diagnostics from the server response. Paths named with the profileDir prefix are under the selected profile; all other relative paths are under `skillDir`.
 
-**This file is the method — it names no product.** Every product-specific fact (which screens exist, the design laws, the palette, the passes to run) lives in `profile/PROFILE.md`. Replacing `profile/` is how this skill is pointed at a different product.
+**This file is the method — it names no product.** Every product-specific fact (which screens exist, the design laws, the palette, the passes to run) lives in the selected profile. Use `$setup-profile` to create `projectDir/wb-design-profile` or add production templates without editing the installed plugin.
 
-**The product profile** (in `profile/`) — everything specific to this product, and the only directory a forking team rewrites:
+**The product profile** (in `profileDir`) — everything specific to this product:
 - `PROFILE.md` — **Read this at Step 3.** Its frontmatter is the machine-readable profile config (product, platform, page class, token prefix); its body carries the screen table, template routing, design language, product laws, passes, and quick reference
 - `screens/` — Production screen templates (the ground truth)
 - `design-system/` — `tokens.css` (the single source of truth), `components.css`, and profile icons
@@ -38,11 +37,8 @@ The profile's screen table lists every production template on disk, and `npm run
 
 **Brainstorm-specific references**:
 - `references/solution-archetypes.md` — UX and visual exploration archetypes for diversifying 3-solution sets
-- `references/setup-profile.md` — Interactive, step-by-step Agent workflow for replacing the bundled product profile
 - `references/branches/push-to-figma.md` — Shared Push to Figma branch
 - **Playwright MCP / Chrome dev tool MCP / browser tool** — Used for screenshot verification when available. If no browser automation tool is available in the current provider, skip verification for that session and tell the user.
-
-**Profile setup routing:** If the user asks to create, set up, replace, or adapt the product profile, do not enter the design brainstorm workflow below. Read `references/setup-profile.md` and execute it one step at a time. Before asking anything, infer and prefill the current step from all available sources. Treat the user as the previewer: ask only for confirmation, corrections, or one truly missing source, then implement and verify the step yourself.
 
 ---
 
@@ -51,7 +47,7 @@ The profile's screen table lists every production template on disk, and `npm run
 1. User describes idea
 2. **Step 1:** Ask clarifying questions
 3. **Step 2:** Start brainstorm server (`node scripts/serve-preview.cjs`)
-4. **Step 3:** Read `profile/PROFILE.md`, then the production templates from `profile/screens/`
+4. **Step 3:** Read `profileDir/PROFILE.md`, then the production templates from `profileDir/screens/`
 5. **Step 4:** Generate multiple solutions (3 by default, if the user didn't specify), then run Simplify and the profile's passes before showing them
 6. User picks a direction (or request new options)
 7. **Step 5:** Build full flow screens, then run Simplify and the profile's passes before showing them
@@ -108,7 +104,16 @@ node "<skill-dir>/scripts/serve-preview.cjs" \
   --port 3210
 ```
 
-Save `screenDir`, `stateDir`, `telemetryPath`, `annotationsPath`, and `url` from the JSON response. You will write all screen HTML files to `screenDir` and use `url` for all subsequent API calls. Tell user to open the URL; they can click the button at the bottom-right of the page to annotate an element directly instead of describing it in words.
+Save `profileDir`, `profileSource`, `profileComplete`, `profileIssues`, `screenDir`, `stateDir`, `telemetryPath`, `annotationsPath`, and `url` from the JSON response. `profileSource` is `workspace` when `projectDir/wb-design-profile` is active and `bundled` otherwise. You will write all screen HTML files to `screenDir` and use `url` for all subsequent API calls. Tell user to open the URL; they can click the button at the bottom-right of the page to annotate an element directly instead of describing it in words.
+
+If `profileComplete` is false, inspect every available workspace-profile file before deciding what the issues mean for this task. Continue with the workspace profile when its existing templates, design assets, rules, and the user's supplied evidence are enough to finish; missing unrelated or optional material is not a blocker. Never borrow missing bundled files silently.
+
+Only if the current task cannot be grounded, generated, validated, or previewed with the available workspace material, stop before producing a design and offer two choices:
+
+1. **Use bundled for this run** — restart the server with `--use-bundled-profile`; do not change the workspace profile.
+2. **Fix workspace first** — invoke `$setup-profile`, preserve existing files, and resume after the blocking gaps are repaired.
+
+Explain which exact issue blocks the current task and recommend the choice that best preserves the user's intended customization. A missing file alone is not enough reason to stop.
 
 **Server features:** Serves newest `.html` from `screenDir`, injects the live-reload and annotation clients, links the preview frame stylesheet, injects the platform pack's chrome styles, hot-reloads via SSE, appends annotations to `annotationsPath`, serves shared machinery at `/assets/*` and the product profile at `/profile/*`, records session performance events at `telemetryPath`, auto-shuts down after 30 min idle. The telemetry is passive; do not add manual checkpoints during generation. It observes file writes, automatic QA gate runs, and page reads—not completion of Simplify, profile passes, or visual review. When diagnosing latency, summarize it with `node "<skill-dir>/scripts/report-session-telemetry.mjs" "<stateDir>"` after the session.
 
@@ -116,17 +121,17 @@ Save `screenDir`, `stateDir`, `telemetryPath`, `annotationsPath`, and `url` from
 
 **CRITICAL — Do this before writing ANY screen HTML (including solutions).**
 
-**Read `profile/PROFILE.md` now.** It carries this product's screen table, template routing, design language (colour/typography/component rules), product laws, preview-chrome placeholder, and passes. Everything in Steps 4–6 assumes you have read it.
+**Read `profileDir/PROFILE.md` now when it exists.** It carries this product's screen table, template routing, design language (colour/typography/component rules), product laws, preview-chrome placeholder, and passes. When it is absent or partial, inspect available templates and design-system files and apply the incomplete-profile decision from Step 2.
 
-Then read the closest matching template from `profile/screens/`, using the routing table in the profile.
+Then read the closest available matching template from `profileDir/screens/`, using the routing table when available.
 
-**If no row matches:** list `profile/screens/` and read each file's header comment — every template self-describes its purpose, layout, and background. Only combine sections from multiple templates after confirming no single template covers the screen.
+**If no row matches:** list `profileDir/screens/` and read each file's header comment — every template self-describes its purpose, layout, and background. Only combine sections from multiple templates after confirming no single template covers the screen.
 
 **The rule:** Every screen must be traceable to a production template. Copy and adapt — never invent from scratch. If no single template matches, combine sections from multiple templates.
 
 **Preview chrome:** Use the placeholder form the profile specifies, taken from the production template. Do NOT write status bar, navbar, capsule, or back-arrow markup from scratch — the server expands the placeholder from the active platform pack, which also owns the chrome styles. This chrome is for presentation only, never production code.
 
-**Screen-specific styles:** Each production template defines its own CSS classes in a `<style>` block at the bottom of the file. These are NOT in `profile/design-system/components.css`. When adapting a template, copy these local styles along with the HTML structure.
+**Screen-specific styles:** Each production template defines its own CSS classes in a `<style>` block at the bottom of the file. These are NOT in `profileDir/design-system/components.css`. When adapting a template, copy these local styles along with the HTML structure.
 
 **Product rules and pitfalls:** Follow the profile's product-knowledge section — it names the bridge file, the filter rule, and the injection format. If a product rule conflicts with a template, the rule wins; flag the conflict to the user. If the profile maps no knowledge for this screen, skip silently.
 
@@ -137,7 +142,7 @@ Run after every generated `solutions.html` and after every flow screen.
 **Completion criterion:** The file keeps all required product facts and legal/rate copy, has one clear primary action per screen, and contains no removable copy, decoration, or duplicate element that does not help the user complete the task.
 
 1. Read the generated HTML.
-2. If `profile/knowledge/` exists, read its bridge README and load matching pitfalls when the screen has a mapped component ID. Treat loaded rules as must-keep product constraints. If the directory or mapping is absent, skip silently.
+2. If `profileDir/knowledge/` exists, read its bridge README and load matching pitfalls when the screen has a mapped component ID. Treat loaded rules as must-keep product constraints. If the directory or mapping is absent, skip silently.
 3. Remove or merge anything that fails these checks:
    - The user does not need it to complete the task.
    - The text says something already obvious from nearby UI.
@@ -183,7 +188,7 @@ Write `solutions.html` to `screenDir` using the Page Template. Start from the se
 </div>
 ```
 
-`<page-class>` is the `pageClass` from `profile/PROFILE.md`'s frontmatter. Use that value verbatim.
+`<page-class>` is the `pageClass` from `profileDir/PROFILE.md`'s frontmatter. Use that value verbatim.
 
 Caption each solution with its intent:
 - UX mode: `Hypothesis` + `Tradeoff`
@@ -199,13 +204,15 @@ Check if the server (the `url` saved from Step 2 — the port may differ from 32
 **Pre-user QA gate:** Before asking the user to open the browser, first run the automated gate on the generated file(s) and fix every reported error:
 
 ```bash
-node "<skill-dir>/scripts/run-qa-gate.mjs" "<screenDir>/solutions.html"
+node "<skill-dir>/scripts/run-qa-gate.mjs" \
+  --profile "<profileDir>" \
+  "<screenDir>/solutions.html"
 ```
 
-The gate is deterministic. It always runs universal checks (off-token colours, emoji, missing stylesheets, plus an advisory flag for authored `<script>` since light interaction is allowed), plus this profile's own rules if it ships `profile/quality/rules.mjs`. Exit code 1 means at least one error — fix the HTML and re-run until it exits 0. Warnings (including the `<script>` advisory) never fail the gate. Then eyeball the checks the gate cannot automate:
+The gate is deterministic. It always runs universal checks (off-token colours, emoji, missing stylesheets, plus an advisory flag for authored `<script>` since light interaction is allowed), plus this profile's own rules if it ships `profileDir/quality/rules.mjs`. Exit code 1 means at least one error — fix the HTML and re-run until it exits 0. Warnings (including the `<script>` advisory) never fail the gate. Then eyeball the checks the gate cannot automate:
 - Preview chrome uses the profile's placeholder, not hand-built navbar markup
 - No overflow, clipped text, or unreadable captions
-- Every product law in `profile/PROFILE.md` holds
+- Every product law in `profileDir/PROFILE.md` holds
 - No interactions or motion that break layout, overflow the frame, or drag performance — light interaction (authored `<script>`, CSS transitions/animations) is allowed
 
 **Verify screenshot:** Navigate to the saved `url` from Step 2 with Playwright MCP (`mcp__playwright__browser_navigate` + `mcp__playwright__browser_take_screenshot` with `fullPage: true`). Check for:
@@ -255,7 +262,7 @@ After the user has seen the approved screen or flow, assemble the available path
 
 1. **Feedback** — always available. Edit the current HTML in `screenDir`; the browser hot-reloads through SSE. Repeat until the user is satisfied.
 2. **Push to Figma** — always available. Its branch document is `references/branches/push-to-figma.md`.
-3. **Profile branches** — read the optional Branches table in `profile/PROFILE.md` and append every declared row in table order. Use the row's Branch value as the display name and its Doc value as the branch document. If the section or table has no rows, append nothing.
+3. **Profile branches** — read the optional Branches table in `profileDir/PROFILE.md` and append every declared row in table order. Use the row's Branch value as the display name and its Doc value as the branch document. Resolve a `profile/`-prefixed Doc inside `profileDir`. If the section or table has no rows, append nothing.
 4. **Platform branches** — read the active `platform` from the profile frontmatter. If `platforms/<platform>/branches/` exists, append every `.md` file in filename order; derive its display name from the filename stem (for example, `prototype.md` becomes `Prototype`). Do not open the documents while assembling the list. If the directory is absent or contains no branch documents, append nothing.
 
 Assign display letters (`A`, `B`, `C`, …) to the assembled list only when presenting it. Letters are presentation-local and never part of a branch document's identity. Show the description already available from this method or the profile row's Notes text; do not open any branch workflow document yet.
@@ -279,7 +286,7 @@ For per-screen feedback about preview chrome, change only the `variant` or `titl
 ## Design Principles
 
 - **More on writing in design.** Words appear in a design for one reason: to make it easier to understand, and therefore easier to use. They are design material, not decoration. Bring the same intentionality to copy that you would bring to spacing and color. Before writing anything, ask what the design needs to say, and how it can best be said to help the person navigate the experience. If a design is good enough, it is self-explanatory without extra words. Don't add words that aren't 100% necessary
-- **Stay in the design system.** Every component uses the profile's tokens and patterns. Never introduce a colour, radius, or font that isn't in `profile/design-system/tokens.css`.
+- **Stay in the design system.** Every component uses the profile's tokens and patterns. Never introduce a colour, radius, or font that isn't in `profileDir/design-system/tokens.css`.
 - **Make it feel real with light interaction.** Where a flow has a natural tap — open a popup, expand an option group, switch a tab, toggle a filter, step a carousel — wire it up so the user can click through and feel the journey rather than reading a stack of static screens. Prefer pure CSS (`:checked` checkbox/radio hack, `:target` popovers, `<details>`, `@keyframes`), reach for minimal native JS only when CSS falls short. Encouraged, not required: add it when it aids understanding, never as decoration. Keep any motion short and contained inside the phone frame.
 
 ---
@@ -300,8 +307,8 @@ Method mistakes. **The profile's product laws are the other half of this table**
 
 | Mistake | Fix |
 |---------|-----|
-| Inventing layouts from scratch | Always copy from `profile/screens/` templates |
-| Not reading `profile/PROFILE.md` before generating | Step 3 is mandatory; every product law lives there |
+| Inventing layouts from scratch | Always copy from `profileDir/screens/` templates |
+| Not reading `profileDir/PROFILE.md` before generating | Step 3 is mandatory; every product law lives there |
 | Calling a generic simplify routine | Use the Shared Simplify Pass in this method |
 | Skipping the profile's passes | Steps 4/5 run Simplify **and** every pass the profile declares |
 | Custom/generic navbar | Use the preview-chrome placeholder from a production template |
@@ -310,16 +317,16 @@ Method mistakes. **The profile's product laws are the other half of this table**
 | Showing bare HTML pages | Always wrap in `.phone-mockup` |
 | Calling old standalone skills from Step 4/5 | Use the Shared Simplify Pass and the profile-declared passes from this `brainstorm` skill |
 | Hard-coding Step 6 letters or Prototype availability | Assemble the branch list from shared, profile, and active-platform contributions, then assign letters for that presentation |
-| Hardcoding a colour, radius, or font | Use a token from `profile/design-system/tokens.css` — it is the single source of truth |
+| Hardcoding a colour, radius, or font | Use a token from `profileDir/design-system/tokens.css` — it is the single source of truth |
 | Adding frame styles manually | Server links `assets/frame.css` automatically — no manual linking or copying needed |
 | CTA pinned to screen bottom behind a void | Place the CTA where the source template places it (often centered right after content) |
 | Asking which element the user means while annotations are waiting | Read `annotationsPath` first |
-| Editing a product fact in this file | Product facts belong in `profile/`; this file names no product |
+| Editing a product fact in this file | Product facts belong in `profileDir`; this file names no product |
 
 ---
 
 ## Quick Reference
 
-The active product's palette, typography, and chrome are in the Quick reference section of `profile/PROFILE.md`. `profile/design-system/tokens.css` is the single source of truth for every value.
+The active product's palette, typography, and chrome are in the Quick reference section of `profileDir/PROFILE.md`. `profileDir/design-system/tokens.css` is the single source of truth for every value.
 
-**Production screens & terminology:** Read `profile/PROFILE.md` and the closest matching template in `profile/screens/`.
+**Production screens & terminology:** Read `profileDir/PROFILE.md` and the closest matching template in `profileDir/screens/`.

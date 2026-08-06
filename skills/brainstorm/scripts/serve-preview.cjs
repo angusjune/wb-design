@@ -7,7 +7,7 @@
  * - Watches the screen directory and pushes reload events on changes
  *
  * Usage:
- *   node scripts/serve-preview.cjs --project-dir /path/to/project [--port 3210] [--host 127.0.0.1]
+ *   node scripts/serve-preview.cjs --project-dir /path/to/project [--use-bundled-profile] [--port 3210] [--host 127.0.0.1]
  *
  * Returns JSON on startup:
  *   { "url": "http://localhost:3210", "screenDir": "...", "stateDir": "...", "annotationsPath": "..." }
@@ -18,6 +18,7 @@ const fs = require('fs');
 const path = require('path');
 const { URL } = require('url');
 const { EVENT_FILE, EVENTS, appendSessionEvent } = require('./lib/session-telemetry.cjs');
+const { resolveProfile } = require('./lib/profile-selection.cjs');
 const {
   ANNOTATION_FILE,
   appendAnnotation,
@@ -41,8 +42,31 @@ const SCREEN_DIR = path.join(SESSION_DIR, 'screens');
 const STATE_DIR = path.join(SESSION_DIR, 'state');
 const SKILL_DIR = path.resolve(__dirname, '..');
 const ASSETS_DIR = path.join(SKILL_DIR, 'assets');
-const PROFILE_DIR = path.join(SKILL_DIR, 'profile');
+let profileSelection;
+try {
+  profileSelection = resolveProfile({
+    projectDir: PROJECT_DIR,
+    skillDir: SKILL_DIR,
+    useBundled: args.includes('--use-bundled-profile'),
+  });
+} catch (error) {
+  console.error(`Profile selection failed: ${error.message}`);
+  process.exit(1);
+}
+const PROFILE_DIR = profileSelection.profileDir;
 const PLATFORMS_DIR = path.join(SKILL_DIR, 'platforms');
+const PROFILE = readProfileConfig(PROFILE_DIR);
+const PROFILE_ISSUES = [...profileSelection.issues];
+for (const field of ['platform', 'pageClass']) {
+  if (!PROFILE[field]) PROFILE_ISSUES.push(`PROFILE.md frontmatter is missing ${field}`);
+}
+const PLATFORM_NAME = PROFILE.platform || null;
+let PLATFORM_DIR = PLATFORM_NAME ? path.join(PLATFORMS_DIR, PLATFORM_NAME) : null;
+if (PLATFORM_DIR && !fs.existsSync(PLATFORM_DIR)) {
+  PROFILE_ISSUES.push(`platform pack does not exist: platforms/${PLATFORM_NAME}`);
+  PLATFORM_DIR = null;
+}
+const PROFILE_COMPLETE = PROFILE_ISSUES.length === 0;
 
 fs.mkdirSync(SCREEN_DIR, { recursive: true });
 fs.mkdirSync(STATE_DIR, { recursive: true });
@@ -54,7 +78,13 @@ function recordEvent(event, details = {}) {
   });
 }
 
-recordEvent(EVENTS.SESSION_STARTED, { projectDir: PROJECT_DIR });
+recordEvent(EVENTS.SESSION_STARTED, {
+  projectDir: PROJECT_DIR,
+  profileDir: PROFILE_DIR,
+  profileSource: profileSelection.source,
+  profileComplete: PROFILE_COMPLETE,
+  profileIssues: PROFILE_ISSUES,
+});
 
 // --- SSE clients for live reload ---
 const sseClients = new Set();
@@ -131,7 +161,7 @@ const FRAME_STYLESHEET_TAG = '<link rel="stylesheet" href="/assets/frame.css" da
 const CHROME_TAG = 'preview-chrome';
 
 // The profile's machine-readable config is the frontmatter block at the top of
-// profile/PROFILE.md: flat `key: value` lines between two `---` fences.
+// The selected PROFILE.md: flat `key: value` lines between two `---` fences.
 function readProfileConfig(profileDir) {
   let text = '';
   try { text = fs.readFileSync(path.join(profileDir, 'PROFILE.md'), 'utf8'); } catch {}
@@ -144,15 +174,6 @@ function readProfileConfig(profileDir) {
     }
   }
   return config;
-}
-
-const PROFILE = readProfileConfig(PROFILE_DIR);
-const PLATFORM_NAME = PROFILE.platform || null;
-const PLATFORM_DIR = PLATFORM_NAME ? path.join(PLATFORMS_DIR, PLATFORM_NAME) : null;
-
-if (PLATFORM_DIR && !fs.existsSync(PLATFORM_DIR)) {
-  console.error(`Unknown platform "${PLATFORM_NAME}" — no platforms/${PLATFORM_NAME}/ directory. Check the frontmatter in profile/PROFILE.md.`);
-  process.exit(1);
 }
 
 // The pack's chrome.html carries one <style> block (injected once into every
@@ -453,6 +474,10 @@ server.listen(PORT, HOST, () => {
     screenDir: SCREEN_DIR,
     stateDir: STATE_DIR,
     assetsDir: ASSETS_DIR,
+    profileDir: PROFILE_DIR,
+    profileSource: profileSelection.source,
+    profileComplete: PROFILE_COMPLETE,
+    profileIssues: PROFILE_ISSUES,
     sessionId: SESSION_ID,
     startedAt: new Date(STARTED_AT_MS).toISOString(),
     startedAtMs: STARTED_AT_MS,

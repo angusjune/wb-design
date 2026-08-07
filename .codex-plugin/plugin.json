@@ -1,6 +1,6 @@
 {
   "name": "wb-design",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "微众银行 App 设计工具箱",
   "author": {
     "name": "anguszhu"
@@ -9,7 +9,7 @@
   "interface": {
     "displayName": "WeBank Design",
     "shortDescription": "生成并迭代微众银行 App 设计方案",
-    "longDescription": "基于内置或工作区的微众银行 App 产品档案、现有界面或文字需求，生成多个差异化的移动端 UI 方案，通过浏览器实时预览进行比较和迭代。可将内置档案复制到工作区，根据 Figma、截图或现有 HTML 添加模板，并支持定稿后的细节校验、Figma 推送与微信小程序原型构建。",
+    "longDescription": "基于内置或工作区的微众银行 App 产品档案、现有界面或文字需求，生成多个差异化的移动端 UI 方案，通过浏览器实时预览进行比较和迭代。",
     "developerName": "anguszhu",
     "category": "Design",
     "capabilities": ["Read", "Write"],

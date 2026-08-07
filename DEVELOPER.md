@@ -38,13 +38,12 @@ npm run check:version
 - `design-system/`：唯一 token 来源、组件样式和图标。
 - `knowledge/`：产品知识桥接说明与只读快照（可选）。
 - `quality/`：产品 QA 规则、passes、确定性工具和基准数据（可选）。
-- `prototype/`：Prototype 分支使用的产品实现模板（`app.wxss` 的 token 段是**生成**的，别手改）。
 
 **平台包 `platforms/`** —— 同平台的产品共用
 
-- `wechat/`：微信预览外壳、小程序工具链与 Prototype 分支。
+- `wechat/`：微信预览外壳。
 - `ios/`：iOS 预览外壳。
-- 每个包就是一个 `chrome.html`（一段样式 + 导航结构，预览服务自动展开），要贡献分支就再放一个 `branches/` 目录。
+- 每个包只有一个 `chrome.html`（一段样式 + 导航结构，预览服务自动展开）。
 
 **通用机制** —— 不认识任何产品和平台
 
@@ -79,7 +78,7 @@ npm run benchmark:report -- profile/quality/benchmark/runs/<new> --compare profi
 npm test
 ```
 
-这一个命令会依次检查发布结构、QA gate、会话遥测、点选批注、小程序 token 同步和质量基准报告。
+这一个命令会依次检查发布结构、QA gate、会话遥测、点选批注和质量基准报告。
 
 每次本地 brainstorm 会话都会在返回的 `stateDir` 下写入 `session-events.jsonl`，记录服务启动、`solutions.html` 写入与改版、自动 QA gate 结果和页面读取时间。它不会自动记录 Simplify、产品 pass 或截图人工确认的完成时间。需要定位慢点时运行：
 
@@ -128,7 +127,7 @@ Prompt：
 2. `profile/design-system/tokens.css` —— 换成你的色板、字体、间距。这是唯一的 token 来源。
 3. `profile/PROFILE.md` —— 重写模板表、路由表、产品铁律、设计语言；frontmatter 改成你的 `product`、`platform`、`pageClass`、`tokenPrefix`。
 4. 如需产品专属的定稿后流程，把文档放在 `profile/branches/`，并在 `PROFILE.md` 的 Branches 表中按展示顺序声明。没有就让表保持空白，不需要凑一个分支。
-5. 其余（`design-system/components.css`、`quality/`、`knowledge/`、Prototype 实现模板）都可以边用边补，不需要的可选部分可以删除。
+5. 其余（`design-system/components.css`、`quality/`、`knowledge/`）都可以边用边补，不需要的可选部分可以删除。
 
 改完跑 `npm run validate && npm test`。
 

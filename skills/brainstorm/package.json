@@ -7,8 +7,7 @@
     "preview": "node scripts/serve-preview.cjs",
     "session:report": "node scripts/report-session-telemetry.mjs",
     "validate": "node scripts/validate-skill.mjs",
-    "gen:wxss-tokens": "node platforms/wechat/prototype/generate-wxss-tokens.mjs",
     "benchmark:report": "node quality-benchmark/report.mjs",
-    "test": "node --test --test-concurrency=1 scripts/tests/*.mjs && node platforms/wechat/prototype/generate-wxss-tokens.mjs --check"
+    "test": "node --test --test-concurrency=1 scripts/tests/*.mjs"
   }
 }

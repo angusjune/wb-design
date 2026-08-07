@@ -1,11 +1,11 @@
 ---
 name: brainstorm
-description: 用于基于当前产品档案进行移动端 UI 头脑风暴：生成3个方案、迭代完整流程，并在定稿后继续精简、校验细节、推送 Figma 或构建平台原型。Use when exploring or finishing mobile screens with the active workspace or bundled product profile.
+description: 用于基于当前产品档案进行移动端 UI 头脑风暴：生成3个方案、迭代完整流程，并在定稿后继续精简、校验细节或推送 Figma。Use when exploring or finishing mobile screens with the active workspace or bundled product profile.
 ---
 
 # Design Brainstorm
 
-Interactive design and finishing workflow for mobile screens. Users describe ideas, compare solution options in phone mockups, pick a direction, iterate via terminal feedback with live hot-reload preview, then choose whether to keep editing, push to Figma, or build a platform prototype.
+Interactive design and finishing workflow for mobile screens. Users describe ideas, compare solution options in phone mockups, pick a direction, iterate via terminal feedback with live hot-reload preview, then choose whether to keep editing or push to Figma.
 
 Resolve this skill directory as `skillDir` and the current project root as `projectDir`. The preview server selects `projectDir/wb-design-profile` whenever that directory exists, even when incomplete; otherwise it selects `skillDir/profile`. Save the selected `profileDir` and its diagnostics from the server response. Paths named with the profileDir prefix are under the selected profile; all other relative paths are under `skillDir`.
 
@@ -17,13 +17,12 @@ Resolve this skill directory as `skillDir` and the current project root as `proj
 - `design-system/` — `tokens.css` (the single source of truth), `components.css`, and profile icons
 - `knowledge/` — Optional bundled product-knowledge bridge and read-only caches
 - `quality/` — Optional product rules, passes, deterministic tools, and benchmark data
-- `prototype/` — Optional product-owned implementation template used by the platform Prototype branch
 - `branches/` — Optional product-owned Step 6 branch documents declared by the profile's Branches table
 
 **Platform packs** (in `platforms/`) — the surface's furniture, shared by any product on it. The profile's `platform` field selects exactly one:
-- `wechat/` — WeChat Mini Program: status bar, 88px navbar, capsule; contributes the Prototype branch
-- `ios/` — iOS: status bar, 44px nav bar, home indicator
-- Each pack is a single `chrome.html` — one style block plus the nav markup the server stamps into each `<preview-chrome>` tag — plus any branches it contributes under `branches/`.
+- `wechat/` — WeChat Mini Program navbar
+- `ios/` — iOS navbar
+- Each pack is a single `chrome.html` — one style block plus the nav markup the server stamps into each `<preview-chrome>` tag.
 
 **Shared machinery**:
 - `assets/page-template.html` — Canonical scaffold for every generated HTML file. Copy it before adding screen content.
@@ -51,7 +50,7 @@ The profile's screen table lists every production template on disk, and `npm run
 5. **Step 4:** Generate multiple solutions (3 by default, if the user didn't specify), then run Simplify and the profile's passes before showing them
 6. User picks a direction (or request new options)
 7. **Step 5:** Build full flow screens, then run Simplify and the profile's passes before showing them
-8. **Step 6:** Assemble the available branches from Feedback, the shared Push to Figma branch, the profile's Branches table, and the active platform pack; assign display letters when presenting them
+8. **Step 6:** Assemble the available branches from Feedback, the shared Push to Figma branch, and the profile's Branches table; assign display letters when presenting them
 9. Continue the chosen branch until its completion criterion is met.
 
 ---
@@ -263,8 +262,6 @@ After the user has seen the approved screen or flow, assemble the available path
 1. **Feedback** — always available. Edit the current HTML in `screenDir`; the browser hot-reloads through SSE. Repeat until the user is satisfied.
 2. **Push to Figma** — always available. Its branch document is `references/branches/push-to-figma.md`.
 3. **Profile branches** — read the optional Branches table in `profileDir/PROFILE.md` and append every declared row in table order. Use the row's Branch value as the display name and its Doc value as the branch document. Resolve a `profile/`-prefixed Doc inside `profileDir`. If the section or table has no rows, append nothing.
-4. **Platform branches** — read the active `platform` from the profile frontmatter. If `platforms/<platform>/branches/` exists, append every `.md` file in filename order; derive its display name from the filename stem (for example, `prototype.md` becomes `Prototype`). Do not open the documents while assembling the list. If the directory is absent or contains no branch documents, append nothing.
-
 Assign display letters (`A`, `B`, `C`, …) to the assembled list only when presenting it. Letters are presentation-local and never part of a branch document's identity. Show the description already available from this method or the profile row's Notes text; do not open any branch workflow document yet.
 
 **Critical for A:** Before acting on feedback, read `annotationsPath`. For each file, find the greatest numeric ID in the `through` field of its `consumed` entries; annotations for that file with greater IDs are pending. Capture the last pending ID you actually read for each file. Annotations and typed feedback are the same input and may arrive together in one turn. Apply both directly without restating annotations; hot reload is the confirmation. Always edit the SAME file for iterative changes. Only create new files for new screens.
@@ -279,7 +276,7 @@ Run it once per edited file that had pending annotations. Never acknowledge an I
 
 For per-screen feedback about preview chrome, change only the `variant` or `title` attributes on `<preview-chrome …>` in that screen file. Never edit `platforms/*/chrome.html`, `assets/page-template.html`, or `assets/frame.css` in response to per-screen feedback.
 
-**Critical for non-Feedback branches:** After the user chooses, load only that branch's document. Do not load unselected shared, profile, or platform branch workflows into context. If the required input for the selected branch is missing, ask for it in one short message and do not substitute a screenshot-only or text-only deliverable unless that branch explicitly allows it.
+**Critical for non-Feedback branches:** After the user chooses, load only that branch's document. Do not load unselected shared or profile branch workflows into context. If the required input for the selected branch is missing, ask for it in one short message and do not substitute a screenshot-only or text-only deliverable unless that branch explicitly allows it.
 
 ---
 
@@ -316,7 +313,7 @@ Method mistakes. **The profile's product laws are the other half of this table**
 | Heavy motion or JS that overflows the frame or stalls rendering | Keep interaction light — CSS patterns first, minimal native JS; QA gate flags authored `<script>` only as a warning |
 | Showing bare HTML pages | Always wrap in `.phone-mockup` |
 | Calling old standalone skills from Step 4/5 | Use the Shared Simplify Pass and the profile-declared passes from this `brainstorm` skill |
-| Hard-coding Step 6 letters or Prototype availability | Assemble the branch list from shared, profile, and active-platform contributions, then assign letters for that presentation |
+| Hard-coding Step 6 letters | Assemble the branch list from shared and profile contributions, then assign letters for that presentation |
 | Hardcoding a colour, radius, or font | Use a token from `profileDir/design-system/tokens.css` — it is the single source of truth |
 | Adding frame styles manually | Server links `assets/frame.css` automatically — no manual linking or copying needed |
 | CTA pinned to screen bottom behind a void | Place the CTA where the source template places it (often centered right after content) |

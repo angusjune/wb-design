@@ -2,7 +2,7 @@
 
 这个目录装着**只属于某一个产品的东西**：设计 token、组件样式、生产模板、产品规则、业务知识快照。
 
-其他目录（`assets/`、`scripts/`）是通用机制，不认识任何产品。平台相关的东西（微信预览外壳、小程序工具链）属于平台包，也跟产品无关。
+其他目录（`assets/`、`scripts/`）是通用机制，不认识任何产品。平台相关的预览外壳属于平台包，也跟产品无关。
 
 **换一个产品 = 重写这个目录，别的地方基本不用动。**
 
@@ -26,7 +26,6 @@ profile/
 ├── design-system/      # tokens、组件样式和图标
 ├── knowledge/          # 可选的产品知识桥接说明与只读快照
 ├── quality/            # 可选的规则、passes、确定性工具和质量基准数据
-├── prototype/          # 可选的 Prototype 产品实现模板
 ├── research/           # 可选的当前产品研究记录
 └── README.md           # 换产品与维护说明
 ```
@@ -48,14 +47,13 @@ profile/
 | 5 | `branches/` | **可选**。产品专属的定稿后流程；每个 Markdown 文档都要在 `PROFILE.md` 的 Branches 表中声明。 |
 | 6 | `quality/` | **可选**。维护当前产品的 QA 规则、passes、确定性工具和基准数据；不用的部分直接删除。 |
 | 7 | `knowledge/` | **可选**。产品状态机、业务规律、历史坑点；不用知识快照时清空映射并删除 cache。 |
-| 8 | `prototype/` | 只有要用 Prototype 分支的产品实现模板时才需要。不用就删掉整个目录。 |
-| 9 | `research/` | **可选**。只保留你自己产品的实验记录；换产品时删除或重写，避免把旧产品结论带进新档案。 |
+| 8 | `research/` | **可选**。只保留你自己产品的实验记录；换产品时删除或重写，避免把旧产品结论带进新档案。 |
 
 改完跑一遍：
 
 ```bash
 npm run validate   # 检查模板表和磁盘是否一致、有没有引用到不存在的文件
-npm test           # 运行 QA、会话遥测、WXSS token 和质量基准等全部自测
+npm test           # 运行 QA、会话遥测和质量基准等全部自测
 ```
 
 ---
@@ -70,7 +68,7 @@ npm test           # 运行 QA、会话遥测、WXSS token 和质量基准等全
 | `productName` | 产品全名，用于展示 |
 | `platform` | 平台包的名字，决定预览外壳。目前是 `ios` |
 | `pageClass` | 包住每一屏的那个 class。`qa-gate` 靠它判断「这一屏是照模板做的，不是凭空编的」 |
-| `tokenPrefix` | `design-system/tokens.css` 的自定义属性前缀，不带前导 `--`；小程序 token 生成器用它定位语义 token |
+| `tokenPrefix` | `design-system/tokens.css` 的自定义属性前缀，不带前导 `--` |
 
 路径都是约定死的：`design-system/tokens.css`、`design-system/components.css`、`screens/`、`quality/rules.mjs`（可选，存在即加载），不用配置。
 
@@ -90,7 +88,7 @@ npm test           # 运行 QA、会话遥测、WXSS token 和质量基准等全
 - 每份分支文档至少写清适用条件、必需输入、执行步骤和完成标准；文档里的路径都相对 `brainstorm/` 根目录。
 - 表格顺序就是 Step 6 的展示顺序；选项字母由 `SKILL.md` 在展示时临时分配，不要写进分支文档。
 - 没有产品分支时，让表保持空白或删除整张表，并删除 `branches/`。不要为了占位编造流程。
-- 增删产品分支只改 `profile/`；共享 Push to Figma 和平台分支由各自目录负责。
+- 增删产品分支只改 `profile/`；共享 Push to Figma 分支由 `references/` 负责。
 - `npm run validate` 会检查 Branches 表中用反引号标出的 `Doc` 路径，也会检查现有分支文档里的包内路径。
 
 ---
@@ -99,4 +97,4 @@ npm test           # 运行 QA、会话遥测、WXSS token 和质量基准等全
 
 **class 前缀是这个 profile 自己的。** `wb-app-` 只是微众银行APP的前缀，不是全局约定。通用机制里没有任何地方写死它，所以你换成别的前缀不会有别的东西跟着坏。
 
-**token 只有一个来源，就是 `design-system/tokens.css`。** 如果之后保留 Prototype 分支（当前 `ios` 平台没有，`wechat` 平台才有），小程序 `app.wxss` 里的 token 是从这份文件**生成**出来的，不要手改，避免同一个颜色在两处抄出不同的值。
+**token 只有一个来源，就是 `design-system/tokens.css`。** 不要在组件或页面里另抄一套全局品牌值，避免同一个颜色在多处逐渐漂移。

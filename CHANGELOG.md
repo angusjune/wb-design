@@ -1,5 +1,11 @@
 # wb-design
 
+## 0.2.2
+
+### Patch Changes
+
+- 移除不必要的文件
+
 ## 0.2.1
 
 ### Patch Changes

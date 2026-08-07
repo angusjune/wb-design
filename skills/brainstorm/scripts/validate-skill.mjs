@@ -144,15 +144,6 @@ addMarkdownDocs(path.join(ROOT, 'references'));
 addMarkdownDocs(path.join(ROOT, 'profile', 'quality', 'passes'));
 addMarkdownDocs(path.join(ROOT, 'profile', 'branches'));
 
-const platformsDir = path.join(ROOT, 'platforms');
-if (fs.existsSync(platformsDir)) {
-  for (const entry of fs.readdirSync(platformsDir, { withFileTypes: true })) {
-    if (entry.isDirectory()) {
-      addMarkdownDocs(path.join(platformsDir, entry.name, 'branches'));
-    }
-  }
-}
-
 // A token is a "concrete in-package path" when it starts with a known top-level
 // segment or is a known root file, and carries a file extension (so we skip
 // prose, dirs-as-concepts, and generated-output examples like `home.html`).
@@ -160,15 +151,14 @@ const IN_PKG_PREFIXES = ['assets/', 'profile/', 'platforms/', 'references/', 'to
 const ROOT_FILES = new Set(['AGENTS.md', 'README.md', 'SKILL.md', 'package.json']);
 
 // These exact paths describe optional, conditionally-loaded profile mechanisms
-// (the QA rule-pack, the knowledge cache, the WeChat-only prototype template)
+// (the QA rule-pack and the knowledge cache)
 // that shared docs reference illustratively when explaining the mechanism, not
 // as an assertion that every profile carries them. A profile that legitimately
-// skips the mechanism (see references/setup-profile.md Steps 6/7/9) won't have
+// skips the mechanism (see references/setup-profile.md Steps 6/7) won't have
 // these on disk — that's a valid, documented end state, not a broken link.
 const OPTIONAL_MECHANISM_PATHS = new Set([
   'profile/quality/rules.mjs',
   'profile/knowledge/README.md',
-  'profile/prototype/template',
 ]);
 
 function looksLikeInPackagePath(tok) {

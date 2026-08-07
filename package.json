@@ -1,6 +1,6 @@
 {
   "name": "wb-design",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "private": true,
   "description": "Codex plugin for brainstorming and prototyping WeBank mobile product designs.",
   "scripts": {
@@ -10,7 +10,6 @@
     "check:version": "node scripts/sync-plugin-version.mjs --check",
     "preview": "npm --prefix skills/brainstorm run preview --",
     "session:report": "npm --prefix skills/brainstorm run session:report --",
-    "gen:wxss-tokens": "npm --prefix skills/brainstorm run gen:wxss-tokens --",
     "benchmark:report": "npm --prefix skills/brainstorm run benchmark:report --",
     "validate": "npm run check:version && npm --prefix skills/brainstorm run validate",
     "test": "npm --prefix skills/brainstorm test"

@@ -5,7 +5,7 @@
 ## 先守住三层边界
 
 - `profile/` 是内置默认产品档案：产品名、设计 token、组件、生产模板、业务规则、产品工具和产品基准数据只能放在产品档案内。项目自定义内容由同级 `setup-profile` Skill 写入工作区 `wb-design-profile/`。
-- `platforms/` 是平台包：只放某个平台共有的预览外壳、平台分支和工具链，不得写死产品名、产品 class 或 token 前缀。
+- `platforms/` 是平台包：每个平台只放一个共有的预览外壳 `chrome.html`，不得写死产品名、产品 class 或 token 前缀。
 - 其余目录是通用机制：不得出现产品名，也不得假设微信、iOS 等具体平台。
 
 额外约束：
@@ -45,9 +45,7 @@ brainstorm/
 - `profile/design-system/`：token、组件样式和图标。
 - `profile/knowledge/`：可选的知识桥接说明与只读快照。
 - `profile/quality/`：可选的产品规则、passes、确定性工具和基准数据。
-- `profile/prototype/`：可选的 Prototype 产品实现模板。
 - `platforms/<platform>/chrome.html`：该平台的预览外壳。
-- `platforms/<platform>/branches/`：仅该平台可用的后续分支。
 
 ## 脚本职责
 
@@ -68,18 +66,6 @@ brainstorm/
 | `scripts/tests/annotations.mjs` | 用真实预览服务、HTTP、文件监听和确认 CLI 校验点选批注链路。 | 修改批注客户端、接口或 pending/consumed 协议时。 |
 | `scripts/tests/quality-benchmark.mjs` | 冒烟测试基准报告、渲染和并排比较。 | 修改报告器或截图链路时。 |
 | `quality-benchmark/report.mjs` | 对指定 run 跑 QA、用真实预览服务渲染，并生成 JSON、Markdown 与对比图。 | 修改质量评估报告格式或渲染方式时。 |
-
-### 平台脚本
-
-这些脚本只应包含对应平台的知识，不能写死产品前缀：
-
-| 路径 | 职责 |
-|---|---|
-| `platforms/wechat/prototype/generate-wxss-tokens.mjs` | 从 `profile/design-system/tokens.css` 生成小程序 `app.wxss` 的标记区块；用 `PROFILE.md` 的 `tokenPrefix` 定位语义 token。 |
-| `platforms/wechat/prototype/verify-miniprogram.mjs` | 静态检查小程序页面、组件、资源和 Web-only 用法，并在工具可用时做可选真编译。 |
-| `platforms/wechat/prototype/render-html-reference.mjs` | 把已批准的 brainstorm HTML 渲染成无手机外框的设计参考 PNG。 |
-| `platforms/wechat/prototype/capture-miniprogram.mjs` | 通过微信开发者工具截取小程序实现图。 |
-| `platforms/wechat/prototype/conform-to-design.mjs` | 配对参考图与实现图，生成像素差异、三联图和 manifest。 |
 
 ### 产品工具
 
@@ -102,7 +88,6 @@ brainstorm/
 3. 重写 `profile/design-system/tokens.css`、`profile/design-system/components.css` 和 `profile/design-system/assets/`。
    - `profile/design-system/tokens.css` 是唯一 token 来源；组件和模板优先引用 token。
    - class 与 token 前缀属于产品档案，可整体更换；通用脚本不应依赖具体前缀。
-   - 若保留小程序模板，至少提供生成器使用的语义后缀：`theme-500`、`theme-100`、`theme-600`、`danger-500`、`text-primary`、`text-secondary`、`text-tertiary`、`text-on-theme`、`surface`、`bg`、`divider`、`radius-pill`、`radius-card`、`font-family`。
 4. 重写或删除可选产品知识。
    - `profile/knowledge/` 与 `profile/research/` 都只能保留新产品内容。
    - 如果不使用知识快照，清空 `profile/knowledge/README.md` 的映射并删除旧 cache，不要让 Agent 读到旧业务规则。
@@ -112,15 +97,12 @@ brainstorm/
    - `profile/quality/tools/` 与 pass 一起替换，删除不再使用的计算器或数据文件。
 6. 处理产品分支。
    - 产品专属 Step 6 分支文档放进 `profile/branches/`，并按展示顺序写入 `PROFILE.md` 的 Branches 表。
-   - 没有产品分支时删除整个目录并让 Branches 表保持空白；共享与平台分支不受影响。
+   - 没有产品分支时删除整个目录并让 Branches 表保持空白；共享分支不受影响。
    - 新增或删除产品分支不应修改 `SKILL.md`。
-7. 处理 `profile/prototype/`。
-   - 需要小程序 Prototype 分支时，替换模板、组件和页面壳；修改 token 后运行 `npm run gen:wxss-tokens`。
-   - 不需要时可删除整个目录；`npm test` 中的 token 同步检查会自动跳过。
-8. 处理 `profile/quality/benchmark/`。
+7. 处理 `profile/quality/benchmark/`。
    - 删除旧产品 prompts、fixtures 和 runs；按需为新产品建立基准。
    - 没有 fixtures 时，相关冒烟测试会跳过，但生产模板仍会被 QA 校准。
-9. 不要为换产品修改 `SKILL.md`、`scripts/`、`assets/` 或 `references/`。如果新产品暴露的是通用缺陷，单独修通用机制，并确认没有加入产品事实。
+8. 不要为换产品修改 `SKILL.md`、`scripts/`、`assets/` 或 `references/`。如果新产品暴露的是通用缺陷，单独修通用机制，并确认没有加入产品事实。
 
 ## 修改后的验证
 
@@ -135,7 +117,6 @@ bun test
 
 - 只改说明：至少跑 `bun run validate`。
 - 改模板、tokens、components、rules 或 QA：跑 `bun run validate && bun test`。
-- 改小程序模板或 token：再跑 `bun run gen:wxss-tokens` 和 `platforms/wechat/prototype/verify-miniprogram.mjs`。
 - 改生成方法、模板语料或 passes：按 `quality-benchmark/README.md` 跑新旧 run 对比。
 - 改预览服务：启动 `bun run preview -- --project-dir <临时目录>`，确认返回 JSON、页面可访问、热更新和退出都正常。
 

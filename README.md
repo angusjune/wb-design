@@ -66,6 +66,7 @@ codex plugin marketplace add angusjune/wb-design
 
 > [!TIP] 
 > **Profile 是什么?**
+>
 > Profile 是 Brainstorm 的产品设计上下文，包含生产页面模板、design token、组件样式和产品规则。建议在每个工作区首次使用时运行一次 `$setup-profile`，Skill会将内置 Profile 复制为 `./wb-design-profile`；之后 Brainstorm 会优先使用这份可编辑副本，你可以根据需要新增、修改设计或模板，而不会被插件更新所覆盖。
 
 #### Prompt 示例
@@ -143,6 +144,11 @@ Brainstorm 在对话中澄清设计目标并生成方案：
 # 直接调用即可, 不需要其他prompt
 $wtf
 ```
+
+## 推荐工作流
+
+1. 安装插件后, 在一个干净的文件夹直接使用 `$setup-profile` 进行初始化。
+2. 后面每次运行 `$brainstorm` 生成方案, 或使用 `$setup-profile` 修改profile, 均在该文件夹下进行。
 
 ## 插件开发说明
 

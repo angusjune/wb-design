@@ -1,5 +1,11 @@
 # wb-design
 
+## 0.3.0
+
+### Minor Changes
+
+- 每次 `brainstorm` 的运行产物都会保存在当前目录下 `wb-design-brainstorms/<timestamp>-<run-label>/` 以便重新查看
+
 ## 0.2.2
 
 ### Patch Changes

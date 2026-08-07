@@ -1,6 +1,7 @@
 // Shared telemetry primitives for the preview server, QA gate, reporter, and tests.
 const fs = require('fs');
 const path = require('path');
+const { RUNS_DIRNAME } = require('./run-directory.cjs');
 
 const EVENT_FILE = 'session-events.jsonl';
 const SCHEMA_VERSION = 1;
@@ -47,9 +48,9 @@ function findSessionStateDir(file) {
   const absolute = path.resolve(file);
   const screenDir = path.dirname(absolute);
   if (path.basename(screenDir) !== 'screens') return null;
-  const sessionDir = path.dirname(screenDir);
-  if (path.basename(path.dirname(sessionDir)) !== '.brainstorm') return null;
-  const stateDir = path.join(sessionDir, 'state');
+  const runDir = path.dirname(screenDir);
+  if (path.basename(path.dirname(runDir)) !== RUNS_DIRNAME) return null;
+  const stateDir = path.join(runDir, 'state');
   return fs.existsSync(path.join(stateDir, 'server-info.json')) ? stateDir : null;
 }
 

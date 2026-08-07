@@ -64,6 +64,6 @@ node "<brainstormSkillDir>/scripts/run-qa-gate.mjs" \
   "<workspaceDir>/wb-design-profile/screens/<template>.html"
 ```
 
-Then start `brainstormSkillDir/scripts/serve-preview.cjs --project-dir "<workspaceDir>"`. Use its returned `screenDir` to prepare a preview document from `brainstormSkillDir/assets/page-template.html`, inserting the template's fragment markup and trailing style block at the marked placeholders. Inspect the rendered result for the user's requested change and regressions; apply corrections and rerun the affected checks until they pass.
+Then start `brainstormSkillDir/scripts/serve-preview.cjs --project-dir "<workspaceDir>" --run-label "<change-purpose>-profile-preview"`, where `<change-purpose>` is a short lowercase kebab-case description of the requested change. Use its returned `screenDir` to prepare a preview document from `brainstormSkillDir/assets/page-template.html`, inserting the template's fragment markup and trailing style block at the marked placeholders. Inspect the rendered result for the user's requested change and regressions; apply corrections and rerun the affected checks until they pass.
 
 **Completion criterion:** the requested workspace-profile files contain the change; every affected reference and consumer remains consistent; profile validation and every applicable template QA check pass; and every visual change has been verified in the rendered preview.

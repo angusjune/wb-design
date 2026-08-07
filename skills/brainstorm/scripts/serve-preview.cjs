@@ -7,10 +7,10 @@
  * - Watches the screen directory and pushes reload events on changes
  *
  * Usage:
- *   node scripts/serve-preview.cjs --project-dir /path/to/project [--use-bundled-profile] [--port 3210] [--host 127.0.0.1]
+ *   node scripts/serve-preview.cjs --project-dir /path/to/project --run-label loan-detail-redesign [--use-bundled-profile] [--port 3210] [--host 127.0.0.1]
  *
  * Returns JSON on startup:
- *   { "url": "http://localhost:3210", "screenDir": "...", "stateDir": "...", "annotationsPath": "..." }
+ *   { "url": "http://localhost:3210", "runDir": "...", "screenDir": "...", "stateDir": "...", "annotationsPath": "..." }
  */
 
 const http = require('http');
@@ -19,6 +19,7 @@ const path = require('path');
 const { URL } = require('url');
 const { EVENT_FILE, EVENTS, appendSessionEvent } = require('./lib/session-telemetry.cjs');
 const { resolveProfile } = require('./lib/profile-selection.cjs');
+const { createRunDirectory, validateRunLabel } = require('./lib/run-directory.cjs');
 const {
   ANNOTATION_FILE,
   appendAnnotation,
@@ -37,9 +38,13 @@ const HOST = getArg('host', '127.0.0.1');
 const PROJECT_DIR = getArg('project-dir', process.cwd());
 const STARTED_AT_MS = Date.now();
 const SESSION_ID = `${process.pid}-${STARTED_AT_MS}`;
-const SESSION_DIR = path.join(PROJECT_DIR, '.brainstorm', SESSION_ID);
-const SCREEN_DIR = path.join(SESSION_DIR, 'screens');
-const STATE_DIR = path.join(SESSION_DIR, 'state');
+let RUN_LABEL;
+try {
+  RUN_LABEL = validateRunLabel(getArg('run-label'));
+} catch (error) {
+  console.error(`Run label is invalid: ${error.message}`);
+  process.exit(2);
+}
 const SKILL_DIR = path.resolve(__dirname, '..');
 const ASSETS_DIR = path.join(SKILL_DIR, 'assets');
 let profileSelection;
@@ -68,6 +73,18 @@ if (PLATFORM_DIR && !fs.existsSync(PLATFORM_DIR)) {
 }
 const PROFILE_COMPLETE = PROFILE_ISSUES.length === 0;
 
+let run;
+try {
+  run = createRunDirectory({ projectDir: PROJECT_DIR, runLabel: RUN_LABEL, startedAtMs: STARTED_AT_MS });
+} catch (error) {
+  console.error(`Run directory creation failed: ${error.message}`);
+  process.exit(1);
+}
+const RUN_DIR = run.runDir;
+const RUN_NAME = run.runName;
+const SCREEN_DIR = path.join(RUN_DIR, 'screens');
+const STATE_DIR = path.join(RUN_DIR, 'state');
+
 fs.mkdirSync(SCREEN_DIR, { recursive: true });
 fs.mkdirSync(STATE_DIR, { recursive: true });
 
@@ -80,6 +97,9 @@ function recordEvent(event, details = {}) {
 
 recordEvent(EVENTS.SESSION_STARTED, {
   projectDir: PROJECT_DIR,
+  runDir: RUN_DIR,
+  runName: RUN_NAME,
+  runLabel: RUN_LABEL,
   profileDir: PROFILE_DIR,
   profileSource: profileSelection.source,
   profileComplete: PROFILE_COMPLETE,
@@ -471,6 +491,9 @@ server.listen(PORT, HOST, () => {
     url: `http://${HOST}:${PORT}`,
     host: HOST,
     port: PORT,
+    runDir: RUN_DIR,
+    runName: RUN_NAME,
+    runLabel: RUN_LABEL,
     screenDir: SCREEN_DIR,
     stateDir: STATE_DIR,
     assetsDir: ASSETS_DIR,

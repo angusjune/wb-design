@@ -69,7 +69,14 @@ Three URL prefixes are mapped by the server: `/profile/` is the product profile,
 
 **Preview chrome** is always written as `<preview-chrome variant="…" title="…">`. The server expands it using the active platform pack; which variants exist is the pack's business, and the profile documents which to use where.
 
-**File naming:** Semantic names: `solutions.html`, `home.html`, `detail.html`. Iterations: `home-v2.html`. Never reuse filenames.
+**Generated-file names:** Name files in lowercase kebab-case by user-facing purpose:
+
+- `solutions.html` — the Step 4 comparison page
+- `<screen-purpose>.html` — one editable screen, such as `home.html` or `loan-detail.html`
+- `<screen-purpose>-<state>.html` — a distinct state of that screen, such as `loan-detail-error.html`
+- `flow.html` — the Step 5 journey overview
+
+Keep editing the same filename during feedback. Create another file only for a different screen, state, or the flow overview.
 
 ---
 
@@ -85,7 +92,7 @@ Examples:
 2. **How many screens?** — "A) One screen (default), B) 2-3 step flow, C) Home + detail pages"
 3. **What data needs to be shown?** — Amounts, lists, forms, status results?
 
-**You have enough when you can answer:** What screens? What's on each? What do buttons do?
+**Step 1 is complete when you can answer:** What screens? What's on each? What do buttons do?
 
 **Before generating, write a brief snapshot for yourself:**
 - Core user action
@@ -94,16 +101,22 @@ Examples:
 - Source production template(s)
 - Product rules / pitfalls loaded, if any
 - Non-goals or constraints from the user
+- `runLabel`: 2–5 lowercase English words in kebab-case that identify this task, such as `loan-detail-redesign`
+
+The `runLabel` names the whole brainstorm, not an individual screen. Continue only when it matches `^[a-z0-9]+(?:-[a-z0-9]+)*$`.
 
 ### Step 2: Start the Brainstorm Server
 
 ```bash
 node "<skill-dir>/scripts/serve-preview.cjs" \
   --project-dir /path/to/project \
+  --run-label "<runLabel>" \
   --port 3210
 ```
 
-Save `profileDir`, `profileSource`, `profileComplete`, `profileIssues`, `screenDir`, `stateDir`, `telemetryPath`, `annotationsPath`, and `url` from the JSON response. `profileSource` is `workspace` when `projectDir/wb-design-profile` is active and `bundled` otherwise. You will write all screen HTML files to `screenDir` and use `url` for all subsequent API calls. Tell user to open the URL; they can click the button at the bottom-right of the page to annotate an element directly instead of describing it in words.
+Each start creates `runDir` at `projectDir/wb-design-brainstorms/<YYYYMMDD-HHmmss>-<runLabel>/`; a same-second collision receives `-2`, then `-3`. The returned `screenDir` is `runDir/screens/`. Write every generated HTML file there; `profileDir/screens/` contains production templates. The returned `stateDir` is `runDir/state/` and holds `server-info.json`, annotation state, session telemetry, and the shutdown marker. Treat it as server-owned workflow state rather than generated design output.
+
+Save `runDir`, `runName`, `runLabel`, `profileDir`, `profileSource`, `profileComplete`, `profileIssues`, `screenDir`, `stateDir`, `telemetryPath`, `annotationsPath`, and `url` from the JSON response. `profileSource` is `workspace` when `projectDir/wb-design-profile` is active and `bundled` otherwise. Use the returned paths rather than reconstructing them, and use `url` for all subsequent API calls. Tell user to open the URL; they can click the button at the bottom-right of the page to annotate an element directly instead of describing it in words.
 
 If `profileComplete` is false, inspect every available workspace-profile file before deciding what the issues mean for this task. Continue with the workspace profile when its existing templates, design assets, rules, and the user's supplied evidence are enough to finish; missing unrelated or optional material is not a blocker. Never borrow missing bundled files silently.
 

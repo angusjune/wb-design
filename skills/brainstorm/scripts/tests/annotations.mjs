@@ -87,7 +87,12 @@ async function waitFor(check, label, timeoutMs = 3000) {
 }
 
 async function startServer(projectDir, port) {
-  const child = spawn(process.execPath, [SERVER, '--project-dir', projectDir, '--port', String(port)], {
+  const child = spawn(process.execPath, [
+    SERVER,
+    '--project-dir', projectDir,
+    '--run-label', 'annotations-test',
+    '--port', String(port),
+  ], {
     cwd: BRAINSTORM_DIR,
     stdio: ['ignore', 'pipe', 'pipe'],
   });

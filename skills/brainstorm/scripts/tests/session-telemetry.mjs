@@ -66,7 +66,13 @@ function readEvents(stateDir) {
 }
 
 async function startServer(projectDir, port, extraArgs = []) {
-  const child = spawn(process.execPath, [SERVER, '--project-dir', projectDir, '--port', String(port), ...extraArgs], {
+  const child = spawn(process.execPath, [
+    SERVER,
+    '--project-dir', projectDir,
+    '--run-label', 'telemetry-test',
+    '--port', String(port),
+    ...extraArgs,
+  ], {
     cwd: BRAINSTORM_DIR,
     stdio: ['ignore', 'pipe', 'pipe'],
   });
@@ -91,9 +97,28 @@ let running;
 
 try {
   const port = await getFreePort();
+  const missingLabel = spawnSync(process.execPath, [SERVER, '--project-dir', projectDir, '--port', String(port)], {
+    cwd: BRAINSTORM_DIR,
+    encoding: 'utf8',
+  });
+  if (missingLabel.status !== 2 || !missingLabel.stderr.includes('--run-label is required')) {
+    fail(`server did not reject a missing run label: ${missingLabel.status} ${missingLabel.stderr}`);
+  }
+  pass('server requires a human-readable run label');
+
   running = await startServer(projectDir, port);
   const { child, info } = running;
   const eventPath = path.join(info.stateDir, EVENT_FILE);
+
+  if (info.runLabel !== 'telemetry-test'
+    || !/^\d{8}-\d{6}-telemetry-test$/.test(info.runName)
+    || info.runDir !== path.join(projectDir, 'wb-design-brainstorms', info.runName)
+    || info.screenDir !== path.join(info.runDir, 'screens')
+    || info.stateDir !== path.join(info.runDir, 'state')) {
+    fail(`unexpected run layout: ${JSON.stringify(info)}`);
+  }
+  if (info.sessionId === info.runName) fail('internal session ID leaked into the human run name');
+  pass('server creates the documented human-readable run layout');
 
   if (info.profileSource !== 'bundled' || info.profileDir !== path.join(BRAINSTORM_DIR, 'profile')) {
     fail(`unexpected profile selection: ${info.profileSource} ${info.profileDir}`);
@@ -107,6 +132,10 @@ try {
   let events = readEvents(info.stateDir);
   for (const required of [EVENTS.SESSION_STARTED, EVENTS.SERVER_LISTENING]) {
     if (!events.some((event) => event.event === required)) fail(`missing ${required} event`);
+  }
+  const started = events.find((event) => event.event === EVENTS.SESSION_STARTED);
+  if (started.runDir !== info.runDir || started.runName !== info.runName || started.runLabel !== info.runLabel) {
+    fail('session-started event lacks run identity');
   }
   pass('server startup events recorded');
 
@@ -163,6 +192,7 @@ try {
   });
   if (report.status !== 0) fail(`reporter failed: ${report.stdout} ${report.stderr}`);
   const summary = JSON.parse(report.stdout);
+  if (summary.runName !== info.runName || summary.runLabel !== info.runLabel) fail('report lacks human run identity');
   if (summary.solutions.revisions !== 2) fail(`report revisions ${summary.solutions.revisions} != 2`);
   if (summary.solutions.qaRuns !== 1) fail(`report QA runs ${summary.solutions.qaRuns} != 1`);
   if (!Number.isFinite(summary.solutions.prepareAndGenerateMs)) fail('report missing prepareAndGenerateMs');

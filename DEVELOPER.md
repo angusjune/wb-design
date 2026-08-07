@@ -80,7 +80,7 @@ npm test
 
 这一个命令会依次检查发布结构、QA gate、会话遥测、点选批注和质量基准报告。
 
-每次本地 brainstorm 会话都会在返回的 `stateDir` 下写入 `session-events.jsonl`，记录服务启动、`solutions.html` 写入与改版、自动 QA gate 结果和页面读取时间。它不会自动记录 Simplify、产品 pass 或截图人工确认的完成时间。需要定位慢点时运行：
+每次本地 brainstorm 都会在 `wb-design-brainstorms/<YYYYMMDD-HHmmss>-<run-label>/` 下创建一个 run：`screens/` 保存当前 HTML，`state/` 保存运行信息、批注状态、遥测和退出标记。内部 `sessionId` 只用于状态记录，不参与人类可读的目录名。`stateDir/session-events.jsonl` 记录服务启动、`solutions.html` 写入与改版、自动 QA gate 结果和页面读取时间；它不会自动记录 Simplify、产品 pass 或截图人工确认的完成时间。需要定位慢点时运行：
 
 ```bash
 npm run session:report -- /path/to/session/state

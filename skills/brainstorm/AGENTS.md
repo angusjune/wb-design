@@ -1,6 +1,6 @@
 # Brainstorm Skill 维护指南
 
-本目录是可单独复制、上传和运行的 publishable skill directory。`profile/` 是内置默认档案；运行时只允许通过固定 seam 选择项目根目录的 `wb-design-profile/`。工作区档案存在时即选中并尽力使用，完整性问题作为任务级诊断。这不是多产品配置系统：一次运行始终只有一个选中的产品档案。
+本目录是可单独复制、上传和运行的 publishable skill directory。`profile/` 是内置默认档案；运行时只允许通过固定 seam 选择项目根目录的 `wb-design-profile/`。工作区档案存在时即选中并尽力使用，完整性问题作为任务级诊断。生成结果按 `<YYYYMMDD-HHmmss>-<run-label>` 保存到项目根目录的 `wb-design-brainstorms/`。这不是多产品配置系统：一次运行始终只有一个选中的产品档案。
 
 ## 先守住三层边界
 
@@ -53,17 +53,19 @@ brainstorm/
 
 | 路径 | 职责 | 何时修改 |
 |---|---|---|
-| `scripts/serve-preview.cjs` | 启动本地预览服务；选择固定工作区 seam 或内置档案，创建会话目录、挂载 `/assets/`、`/profile/`、`/platform/`，展开 `<preview-chrome>`，注入展示样式、热更新和点选批注客户端，并记录会话事件。 | 修改档案选择、预览协议、挂载点、平台外壳展开或会话生命周期时。 |
+| `scripts/serve-preview.cjs` | 启动本地预览服务；选择固定工作区 seam 或内置档案，创建可追溯的 run 目录、挂载 `/assets/`、`/profile/`、`/platform/`，展开 `<preview-chrome>`，注入展示样式、热更新和点选批注客户端，并记录会话事件。 | 修改档案选择、预览协议、挂载点、平台外壳展开或会话生命周期时。 |
 | `scripts/acknowledge-annotations.cjs` | 在 Agent 应用批注后显式确认本轮实际读取到的最后一个 ID；文件写入本身不会消费批注。 | 修改批注 pending/consumed 协议时。 |
 | `scripts/run-qa-gate.mjs` | 对生成 HTML 跑确定性通用检查，并按约定加载可选的 `profile/quality/rules.mjs`。 | 新增所有产品都成立的机械规则时；产品规则不要写进这里。 |
 | `scripts/report-session-telemetry.mjs` | 汇总某次会话的 `session-events.jsonl`，输出生成、QA、预览等阶段耗时。 | 遥测 schema 或分析指标变化时。 |
 | `scripts/validate-skill.mjs` | 检查 skill 自包含性、禁带文件、文档路径、目录体积、模板清单和静态资源引用。 | 增加新的结构约定或发布门禁时。 |
 | `scripts/lib/session-telemetry.cjs` | 共享事件名、JSONL 写入和会话目录发现逻辑；不是独立 CLI。 | 预览、QA、报告器共同需要新的事件字段时。 |
 | `scripts/lib/annotations.cjs` | 共享批注校验、JSONL 读写、显式确认和 pending 推导逻辑；不是独立 CLI。 | 修改批注 schema、长度限制或确认协议时。 |
+| `scripts/lib/run-directory.cjs` | 校验人类可读的 run label，以本地时间生成唯一 run 目录，并声明工作区输出目录名。 | 修改 run 路径、命名或碰撞规则时。 |
 | `scripts/lib/profile-selection.cjs` | 实现唯一的产品档案选择 seam：存在的工作区 `wb-design-profile/` 优先并返回完整性诊断；支持用户明确选择内置 `profile/`。 | 修改固定 seam 的诊断、内置覆盖或服务集成时。 |
 | `scripts/tests/qa-gate.mjs` | 校准 QA fixtures，并要求所有生产模板零 error。 | 修改 QA gate、产品规则或模板时。 |
 | `scripts/tests/session-telemetry.mjs` | 用真实预览服务、文件监听、HTTP 和 QA CLI 做遥测集成测试。 | 修改预览或遥测链路时。 |
 | `scripts/tests/annotations.mjs` | 用真实预览服务、HTTP、文件监听和确认 CLI 校验点选批注链路。 | 修改批注客户端、接口或 pending/consumed 协议时。 |
+| `scripts/tests/run-directory.mjs` | 校验 run label、时间戳、输出 seam 和同秒碰撞规则。 | 修改 run 路径或命名规则时。 |
 | `scripts/tests/quality-benchmark.mjs` | 冒烟测试基准报告、渲染和并排比较。 | 修改报告器或截图链路时。 |
 | `quality-benchmark/report.mjs` | 对指定 run 跑 QA、用真实预览服务渲染，并生成 JSON、Markdown 与对比图。 | 修改质量评估报告格式或渲染方式时。 |
 
@@ -118,7 +120,7 @@ bun test
 - 只改说明：至少跑 `bun run validate`。
 - 改模板、tokens、components、rules 或 QA：跑 `bun run validate && bun test`。
 - 改生成方法、模板语料或 passes：按 `quality-benchmark/README.md` 跑新旧 run 对比。
-- 改预览服务：启动 `bun run preview -- --project-dir <临时目录>`，确认返回 JSON、页面可访问、热更新和退出都正常。
+- 改预览服务：启动 `bun run preview -- --project-dir <临时目录> --run-label smoke-test`，确认返回 JSON、页面可访问、热更新和退出都正常。
 
 提交前再搜索一次旧路径和越界知识：
 

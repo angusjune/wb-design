@@ -79,10 +79,11 @@ Fix every error before preview. Then start the preview server with the workspace
 
 ```bash
 node "<brainstormSkillDir>/scripts/serve-preview.cjs" \
-  --project-dir "<workspaceDir>"
+  --project-dir "<workspaceDir>" \
+  --run-label "<template-purpose>-profile-preview"
 ```
 
-Use the returned `screenDir` to prepare a preview document from Brainstorm's `assets/page-template.html`: place the fragment markup at `<!-- SCREEN CONTENT -->` and its trailing style block at `<!-- SCREEN STYLES -->`. Render every requested screen. When browser automation is available, inspect a full-page screenshot for chrome, spacing, clipping, text, assets, colors, and source fidelity; otherwise give the preview URL to the user.
+Use a short lowercase kebab-case `<template-purpose>`, then use the returned `screenDir` to prepare a preview document from Brainstorm's `assets/page-template.html`: place the fragment markup at `<!-- SCREEN CONTENT -->` and its trailing style block at `<!-- SCREEN STYLES -->`. Render every requested screen. When browser automation is available, inspect a full-page screenshot for chrome, spacing, clipping, text, assets, colors, and source fidelity; otherwise give the preview URL to the user.
 
 Apply corrections and rerun the affected checks until they pass. Ask the user to confirm the rendered screens, not the implementation details.
 

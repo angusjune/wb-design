@@ -92,7 +92,12 @@ function gateCase(runDir, caseId) {
 async function startServer(basePort) {
   for (let port = basePort; port < basePort + 10; port += 1) {
     const projectDir = fs.mkdtempSync(path.join(os.tmpdir(), 'brainstorm-uiq-render-'));
-    const child = spawn(process.execPath, [SERVER, '--project-dir', projectDir, '--port', String(port)], {
+    const child = spawn(process.execPath, [
+      SERVER,
+      '--project-dir', projectDir,
+      '--run-label', 'quality-benchmark-render',
+      '--port', String(port),
+    ], {
       stdio: ['ignore', 'pipe', 'inherit'],
     });
     const line = await new Promise((resolve) => {

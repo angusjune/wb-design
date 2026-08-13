@@ -1,0 +1,39 @@
+{
+  "version": 2,
+  "templates": {
+    "基金tab.html": {
+      "contextFiles": [],
+      "requiredTextPerScreen": [
+        "买一笔",
+        "领取"
+      ]
+    },
+    "基金排行.html": {
+      "contextFiles": [],
+      "requiredTextPerScreen": []
+    },
+    "基金详情页.html": {
+      "contextFiles": [],
+      "requiredTextPerScreen": [
+        "加自选",
+        "定投",
+        "购买",
+        "不构成投资建议"
+      ],
+      "brandIdentitySelectors": [
+        ".wb-fd-hero"
+      ],
+      "diversitySelectors": [
+        ".wb-fd-stats-card",
+        ".wb-fd-performance-card",
+        ".wb-fd-manager-photo"
+      ]
+    },
+    "近3个月涨幅领先的基金.html": {
+      "contextFiles": [],
+      "requiredTextPerScreen": [
+        "买一笔"
+      ]
+    }
+  }
+}

@@ -21,13 +21,13 @@ const SERVER = path.join(BRAINSTORM_DIR, 'scripts/serve-preview.cjs');
 const ACKNOWLEDGE = path.join(BRAINSTORM_DIR, 'scripts/acknowledge-annotations.cjs');
 const ANNOTATE_CLIENT = path.join(BRAINSTORM_DIR, 'assets/annotate.js');
 const PROFILE = path.join(BRAINSTORM_DIR, 'profile/PROFILE.md');
-const PROFILE_FIXTURE = path.join(BRAINSTORM_DIR, 'profile/quality/benchmark/fixtures/clean-inner.html');
+const PROFILE_FIXTURE = path.join(BRAINSTORM_DIR, 'profile/quality/fixtures/clean-inner.html');
 const PROFILE_SCREENS = path.join(BRAINSTORM_DIR, 'profile/screens');
 const PAGE_TEMPLATE = path.join(BRAINSTORM_DIR, 'assets/page-template.html');
 
 // profile/screens/*.html are bare page-class fragments (no <head>/<body>) by
 // design — the real preview pipeline always composes them through
-// assets/page-template.html first. When no dedicated benchmark fixture exists,
+// assets/page-template.html first. When no dedicated QA fixture exists,
 // this test must do the same composition rather than assume a raw fragment is
 // a complete document; otherwise injectHelper() finds neither </head> nor
 // <body> to anchor its <link>/<script> injection on and silently no-ops.

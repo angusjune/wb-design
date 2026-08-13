@@ -13,6 +13,7 @@ const requiredProfileEntries = [
   ['design-system', 'directory'],
   ['design-system/tokens.css', 'file'],
   ['design-system/components.css', 'file'],
+  ['quality/workflow-contracts.json', 'file'],
 ];
 
 function readArg(name) {

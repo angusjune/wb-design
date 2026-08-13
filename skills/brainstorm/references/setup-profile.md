@@ -397,7 +397,7 @@ passes:
   - name: Check Details
     source: generated-from-confirmed-rules
 tools: []
-benchmarkPrompts: skip
+evaluationFixtures: skip
 unresolved: []
 ```
 
@@ -409,7 +409,7 @@ unresolved: []
   1. 阅读 `scripts/run-qa-gate.mjs` 的当前 rule-pack 接口，再重写可选的 `profile/quality/rules.mjs`；不要复制旧产品判断后只换名。
   2. 将每个 pass 写到 `profile/quality/passes/`，写清必需输入、执行步骤、无法执行时的处理和完成标准。
   3. 将 pass 所需的确定性工具放到 `profile/quality/tools/` 并实际运行代表性用例。
-  4. 只在有真实评估任务时建立 `profile/quality/benchmark/`；删除旧产品 prompts、fixtures 和 runs。
+  4. 只在需要校准产品 QA 规则时建立 `profile/quality/fixtures/`；删除旧产品 fixtures。
   5. 先向用户展示规则摘要和代表性 pass/fail 结果；确认后按执行顺序更新 `profile/PROFILE.md` 的 Passes 表。
 - `mode: skip`：
   1. 删除旧 `profile/quality/`。

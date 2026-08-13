@@ -38,13 +38,13 @@ The script preserves an existing workspace profile. It reports `incomplete` plus
 
 First run the copy command above. Read [`references/add-templates.md`](references/add-templates.md) completely and execute its source-to-template workflow for every design the user requested. If the command reports `incomplete`, use the available workspace files and source evidence first; invoke the choice above only when a missing or invalid entry prevents the template from being created, registered, validated, or previewed.
 
-**Completion criterion:** every requested screen has a confirmed HTML template under `wb-design-profile/screens/`; its local assets resolve; `PROFILE.md` lists and routes it; profile validation and the QA gate pass; and the user has reviewed the rendered result.
+**Completion criterion:** every requested screen has a confirmed HTML template under `wb-design-profile/screens/`; its local assets resolve; `PROFILE.md` lists and routes it; `quality/workflow-contracts.json` declares its exact context and invariants; profile validation and the QA gate pass; and the user has reviewed the rendered result.
 
 ## Edit templates or other profile files
 
 First run the copy command above. Resolve every requested target inside `<workspaceDir>/wb-design-profile`, then read each target completely before editing it. Also inspect the profile files that define or consume the target:
 
-- For a screen template, read `PROFILE.md`, the active design-system styles, referenced local assets, and any related templates needed to preserve established patterns.
+- For a screen template, read `PROFILE.md`, `quality/workflow-contracts.json`, the active design-system styles, referenced local assets, and any related templates needed to preserve established patterns. Treat `brandIdentitySelectors` as required identity anchors, not frozen visual implementations.
 - For a shared file such as `PROFILE.md`, a token, component, asset, product-knowledge file, quality pass, or platform file, search the workspace profile for every reference and inspect each affected consumer.
 
 Apply the requested changes only to the workspace profile and preserve unrelated content. Keep the bundled profile untouched. When a change adds, renames, or removes a screen, asset, token, class, rule, or route, update every affected workspace-profile reference in the same edit.
@@ -64,6 +64,6 @@ node "<brainstormSkillDir>/scripts/run-qa-gate.mjs" \
   "<workspaceDir>/wb-design-profile/screens/<template>.html"
 ```
 
-Then start `brainstormSkillDir/scripts/serve-preview.cjs --project-dir "<workspaceDir>" --run-label "<change-purpose>-profile-preview"`, where `<change-purpose>` is a short lowercase kebab-case description of the requested change. Use its returned `screenDir` to prepare a preview document from `brainstormSkillDir/assets/page-template.html`, inserting the template's fragment markup and trailing style block at the marked placeholders. Inspect the rendered result for the user's requested change and regressions; apply corrections and rerun the affected checks until they pass.
+Then start `brainstormSkillDir/scripts/serve-preview.cjs --project-dir "<workspaceDir>" --run-label "<change-purpose>-profile-preview"`, where `<change-purpose>` is a short lowercase kebab-case description of the requested change. Use the returned `runDir` with `brainstormSkillDir/scripts/workflow.mjs prepare --stage profile-preview --kind screen --template "<template>.html" --output "preview.html:1"`, replace its caption placeholder in the prepared content fragment, assemble, and validate. Inspect the returned screenshot for the requested change and regressions; apply corrections to the workspace template, recreate the preview run, and repeat until checks pass.
 
 **Completion criterion:** the requested workspace-profile files contain the change; every affected reference and consumer remains consistent; profile validation and every applicable template QA check pass; and every visual change has been verified in the rendered preview.

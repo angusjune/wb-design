@@ -7,6 +7,7 @@ Use this branch to turn user-supplied design evidence into additive production t
 Read each available workspace-profile file before drafting HTML; record missing or invalid entries instead of stopping immediately:
 
 - `PROFILE.md`, including its frontmatter, screen table, routing table, design language, product laws, canonical actions, and platform chrome rules
+- `quality/workflow-contracts.json`, including the exact generation context and per-screen invariants for related templates
 - `design-system/tokens.css` and `design-system/components.css`
 - the closest existing files under `screens/`
 - any mapped product knowledge or required quality passes relevant to the requested screen
@@ -54,9 +55,15 @@ After the candidates are ready:
 2. Add one row per HTML file to `PROFILE.md`'s **Screen templates** table with a user-facing screen name, exact filename, and specific description.
 3. Add or refine rows under **Which template to read** so user intent deterministically reaches each new template.
 4. Update canonical-template or CTA guidance only when the new source establishes it.
-5. Preserve the order and content of all unrelated rows and sections.
+5. Add the exact filename to `quality/workflow-contracts.json`:
+   - `contextFiles`: only profile-relative files that are necessary for this template beyond `PROFILE.md`, the template itself, design-system CSS, and this contract file. Do not add broad directories.
+   - `requiredTextPerScreen`: stable CTA, legal, risk, agreement, or other source facts that every generated adaptation must preserve. Use the smallest sufficient list; do not freeze optional marketing copy.
+   - `requiredAssetsPerScreen`: optional stable asset URL substrings that every adaptation must retain.
+   - `brandIdentitySelectors`: optional simple class selectors for identity-bearing regions that every rework must retain. Declare the smallest stable anchors; their layout, typography, spacing, shape, modifier classes, and scoped styling remain editable.
+   - `diversitySelectors`: optional simple class selectors for essential product capabilities that each solution must contain exactly once.
+6. Preserve the order and content of all unrelated rows, sections, and workflow contracts.
 
-**Completion criterion:** the screen table and `screens/` directory match in both directions, and each new template has at least one clear routing rule.
+**Completion criterion:** the screen table, `screens/` directory, and workflow-contract keys match in both directions; each template has one clear routing rule and an explicit context/invariant contract.
 
 ## 4. Validate and preview
 
@@ -83,7 +90,19 @@ node "<brainstormSkillDir>/scripts/serve-preview.cjs" \
   --run-label "<template-purpose>-profile-preview"
 ```
 
-Use a short lowercase kebab-case `<template-purpose>`, then use the returned `screenDir` to prepare a preview document from Brainstorm's `assets/page-template.html`: place the fragment markup at `<!-- SCREEN CONTENT -->` and its trailing style block at `<!-- SCREEN STYLES -->`. Render every requested screen. When browser automation is available, inspect a full-page screenshot for chrome, spacing, clipping, text, assets, colors, and source fidelity; otherwise give the preview URL to the user.
+Use a short lowercase kebab-case `<template-purpose>`. For each requested template, run Brainstorm's deterministic workflow against the returned `runDir`:
+
+```bash
+node "<brainstormSkillDir>/scripts/workflow.mjs" prepare \
+  --run-dir "<runDir>" --stage "<template-purpose>" --kind screen \
+  --template "<template>.html" --output "<preview-file>.html:1"
+node "<brainstormSkillDir>/scripts/workflow.mjs" assemble \
+  --run-dir "<runDir>" --stage "<template-purpose>"
+node "<brainstormSkillDir>/scripts/workflow.mjs" validate \
+  --run-dir "<runDir>" --stage "<template-purpose>"
+```
+
+Replace the single-screen caption placeholder in the prepared content fragment before assembly. Inspect the validation screenshot for chrome, spacing, clipping, text, assets, colors, and source fidelity. Browser unavailability blocks this visual completion criterion.
 
 Apply corrections and rerun the affected checks until they pass. Ask the user to confirm the rendered screens, not the implementation details.
 

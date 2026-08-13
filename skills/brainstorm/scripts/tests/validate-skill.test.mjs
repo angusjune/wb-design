@@ -148,4 +148,18 @@ describe('workspace profile validation', () => {
       ),
     );
   });
+
+  test('requires brand identity selectors to be simple classes', () => {
+    const fixtureRoot = makeFixture();
+    const contractPath = path.join(fixtureRoot, 'profile', 'quality', 'workflow-contracts.json');
+    const contracts = JSON.parse(fs.readFileSync(contractPath, 'utf8'));
+    contracts.templates['基金详情页.html'].brandIdentitySelectors = [':root'];
+    fs.writeFileSync(contractPath, `${JSON.stringify(contracts, null, 2)}\n`);
+
+    const result = runValidator(fixtureRoot);
+
+    assert.equal(result.stderr, '');
+    assert.equal(result.exitCode, 1);
+    assert.ok(result.report.errors.some((error) => error.includes('brandIdentitySelectors')));
+  });
 });

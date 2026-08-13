@@ -37,7 +37,7 @@ npm run check:version
 - `screens/`：生产页面模板（Ground Truth，直接决定输出质量）。
 - `design-system/`：唯一 token 来源、组件样式和图标。
 - `knowledge/`：产品知识桥接说明与只读快照（可选）。
-- `quality/`：产品 QA 规则、passes、确定性工具和基准数据（可选）。
+- `quality/`：产品生成契约、QA 规则、passes 和确定性工具。
 
 **平台包 `platforms/`** —— 同平台的产品共用
 
@@ -51,26 +51,13 @@ npm run check:version
 - `assets/`：规范页面壳 `page-template.html`，以及由预览服务自动链接的展示样式 `frame.css`、热更新和批注资源。
 - `references/`：方案发散方法与共享 Push to Figma 分支；通用 Simplify pass 已内联在 `SKILL.md`。
 - `scripts/serve-preview.cjs`、`assets/live-reload.js`、`assets/annotate.js`：本地热更新预览服务，以及浏览器端 SSE 与点选批注客户端。
+- `scripts/workflow.mjs`：准备隔离 authoring context、组装页面、校验浏览器结果、记录选择和 usage。
 - `scripts/run-qa-gate.mjs`：通用质量检查（产品规则由 `profile/quality/rules.mjs` 提供）。
-- `quality-benchmark/`、`scripts/`、`package.json`：质量基准、维护命令与自测。
+- `scripts/`、`package.json`：生产 workflow、维护命令与自测。
 
 ### 开发与测试 Skill
 
 #### 修改后
-
-`quality-benchmark/` 用来评估 `brainstorm` 的真实产出质量，不是日常使用流程的一部分。适合在修改 `SKILL.md`、生产模板、设计资产、pass/分支流程或 `scripts/run-qa-gate.mjs` 后运行，用于比较改动前后的 gate 数字和截图表现；只改普通说明文档时通常不需要。
-
-使用方式见 `quality-benchmark/README.md`。最小报告命令：
-
-```bash
-npm run benchmark:report -- profile/quality/benchmark/runs/<version>
-```
-
-与 baseline 对比：
-
-```bash
-npm run benchmark:report -- profile/quality/benchmark/runs/<new> --compare profile/quality/benchmark/runs/baseline
-```
 
 仓库根目录的自测命令：
 
@@ -78,7 +65,7 @@ npm run benchmark:report -- profile/quality/benchmark/runs/<new> --compare profi
 npm test
 ```
 
-这一个命令会依次检查发布结构、QA gate、会话遥测、点选批注和质量基准报告。
+这一个命令会依次检查发布结构、QA gate、生成 workflow、浏览器契约、会话遥测和点选批注。
 
 每次本地 brainstorm 都会在 `wb-design-brainstorms/<YYYYMMDD-HHmmss>-<run-label>/` 下创建一个 run：`screens/` 保存当前 HTML，`state/` 保存运行信息、批注状态、遥测和退出标记。内部 `sessionId` 只用于状态记录，不参与人类可读的目录名。`stateDir/session-events.jsonl` 记录服务启动、`solutions.html` 写入与改版、自动 QA gate 结果和页面读取时间；它不会自动记录 Simplify、产品 pass 或截图人工确认的完成时间。需要定位慢点时运行：
 

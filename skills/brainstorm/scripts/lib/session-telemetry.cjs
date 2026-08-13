@@ -11,6 +11,10 @@ const EVENTS = Object.freeze({
   SCREEN_WRITTEN: 'screen-written',
   SCREEN_SERVED: 'screen-served',
   QA_COMPLETED: 'qa-completed',
+  WORKFLOW_PREPARED: 'workflow-prepared',
+  WORKFLOW_ASSEMBLED: 'workflow-assembled',
+  WORKFLOW_VALIDATED: 'workflow-validated',
+  WORKFLOW_USAGE_RECORDED: 'workflow-usage-recorded',
   SESSION_STOPPED: 'session-stopped',
 });
 

@@ -5,9 +5,9 @@
   "description": "Self-contained design brainstorm skill with a best-effort workspace-profile seam and explicit bundled fallback.",
   "scripts": {
     "preview": "node scripts/serve-preview.cjs",
+    "workflow": "node scripts/workflow.mjs",
     "session:report": "node scripts/report-session-telemetry.mjs",
     "validate": "node scripts/validate-skill.mjs",
-    "benchmark:report": "node quality-benchmark/report.mjs",
     "test": "node --test --test-concurrency=1 scripts/tests/*.mjs"
   }
 }

@@ -27,12 +27,11 @@ brainstorm/
 ├── scripts/                 # 通用运行、检查、遥测和自测脚本
 ├── profile/                 # 内置默认产品档案
 ├── platforms/               # 平台包；由 PROFILE.md 的 platform 选择
-└── quality-benchmark/       # 通用基准报告器；产品基准数据在 profile/ 下
 ```
 
 关键子目录：
 
-- `assets/page-template.html`：所有生成页面共用的规范 HTML 壳；Agent 先复制，再填充内容与页面局部样式。
+- `assets/page-template.html`：所有生成页面共用的规范 HTML 壳；只由确定性 workflow assembler 读取和填充。
 - `assets/frame.css`：展示框架、手机 mockup、gallery 和 reset；由预览服务自动链接，不要复制进生成页面。
 - `assets/live-reload.js`：浏览器端 SSE 热更新客户端；由预览服务注入。
 - `assets/annotate.js`：浏览器端点选批注客户端；由预览服务注入。
@@ -44,7 +43,8 @@ brainstorm/
 - `profile/screens/`：生产页面模板语料，是生成质量的主要来源。
 - `profile/design-system/`：token、组件样式和图标。
 - `profile/knowledge/`：可选的知识桥接说明与只读快照。
-- `profile/quality/`：可选的产品规则、passes、确定性工具和基准数据。
+- `profile/quality/`：产品生成契约、规则、passes 和确定性工具。
+- `profile/quality/workflow-contracts.json`：每个模板必需的精确上下文与逐屏必须保留的文本/资源不变量；模板清单必须一一对应。
 - `platforms/<platform>/chrome.html`：该平台的预览外壳。
 
 ## 脚本职责
@@ -54,6 +54,7 @@ brainstorm/
 | 路径 | 职责 | 何时修改 |
 |---|---|---|
 | `scripts/serve-preview.cjs` | 启动本地预览服务；选择固定工作区 seam 或内置档案，创建可追溯的 run 目录、挂载 `/assets/`、`/profile/`、`/platform/`，展开 `<preview-chrome>`，注入展示样式、热更新和点选批注客户端，并记录会话事件。 | 修改档案选择、预览协议、挂载点、平台外壳展开或会话生命周期时。 |
+| `scripts/workflow.mjs` | 按 stage 生成隔离 worker brief 和精确上下文、记录选择、用紧凑 handoff 提升或播种下一 stage、组装规范页面、执行终端/浏览器契约，并写 usage report。 | 修改生成上下文、scaffold、handoff、硬性不变量或计量协议时。 |
 | `scripts/acknowledge-annotations.cjs` | 在 Agent 应用批注后显式确认本轮实际读取到的最后一个 ID；文件写入本身不会消费批注。 | 修改批注 pending/consumed 协议时。 |
 | `scripts/run-qa-gate.mjs` | 对生成 HTML 跑确定性通用检查，并按约定加载可选的 `profile/quality/rules.mjs`。 | 新增所有产品都成立的机械规则时；产品规则不要写进这里。 |
 | `scripts/report-session-telemetry.mjs` | 汇总某次会话的 `session-events.jsonl`，输出生成、QA、预览等阶段耗时。 | 遥测 schema 或分析指标变化时。 |
@@ -62,12 +63,13 @@ brainstorm/
 | `scripts/lib/annotations.cjs` | 共享批注校验、JSONL 读写、显式确认和 pending 推导逻辑；不是独立 CLI。 | 修改批注 schema、长度限制或确认协议时。 |
 | `scripts/lib/run-directory.cjs` | 校验人类可读的 run label，以本地时间生成唯一 run 目录，并声明工作区输出目录名。 | 修改 run 路径、命名或碰撞规则时。 |
 | `scripts/lib/profile-selection.cjs` | 实现唯一的产品档案选择 seam：存在的工作区 `wb-design-profile/` 优先并返回完整性诊断；支持用户明确选择内置 `profile/`。 | 修改固定 seam 的诊断、内置覆盖或服务集成时。 |
+| `scripts/lib/workflow-contract.cjs` | 共享 workflow 路径、context manifest、fragment assembly、静态契约和 Codex JSONL usage 解析。 | 修改 workflow schema 或确定性检查时。 |
+| `scripts/lib/browser-contract.cjs` | 用本地 Chrome DevTools 协议检查真实渲染、溢出、chrome 展开、异常和截图。 | 修改浏览器终端契约时。 |
 | `scripts/tests/qa-gate.mjs` | 校准 QA fixtures，并要求所有生产模板零 error。 | 修改 QA gate、产品规则或模板时。 |
 | `scripts/tests/session-telemetry.mjs` | 用真实预览服务、文件监听、HTTP 和 QA CLI 做遥测集成测试。 | 修改预览或遥测链路时。 |
 | `scripts/tests/annotations.mjs` | 用真实预览服务、HTTP、文件监听和确认 CLI 校验点选批注链路。 | 修改批注客户端、接口或 pending/consumed 协议时。 |
 | `scripts/tests/run-directory.mjs` | 校验 run label、时间戳、输出 seam 和同秒碰撞规则。 | 修改 run 路径或命名规则时。 |
-| `scripts/tests/quality-benchmark.mjs` | 冒烟测试基准报告、渲染和并排比较。 | 修改报告器或截图链路时。 |
-| `quality-benchmark/report.mjs` | 对指定 run 跑 QA、用真实预览服务渲染，并生成 JSON、Markdown 与对比图。 | 修改质量评估报告格式或渲染方式时。 |
+| `scripts/tests/workflow.mjs` | 用真实预览服务和 Chrome 校验 prepare → fragment edit → assemble → drift/legal/browser validate → report 的端到端契约。 | 修改生产 workflow 时。 |
 
 ### 产品工具
 
@@ -101,10 +103,7 @@ brainstorm/
    - 产品专属 Step 6 分支文档放进 `profile/branches/`，并按展示顺序写入 `PROFILE.md` 的 Branches 表。
    - 没有产品分支时删除整个目录并让 Branches 表保持空白；共享分支不受影响。
    - 新增或删除产品分支不应修改 `SKILL.md`。
-7. 处理 `profile/quality/benchmark/`。
-   - 删除旧产品 prompts、fixtures 和 runs；按需为新产品建立基准。
-   - 没有 fixtures 时，相关冒烟测试会跳过，但生产模板仍会被 QA 校准。
-8. 不要为换产品修改 `SKILL.md`、`scripts/`、`assets/` 或 `references/`。如果新产品暴露的是通用缺陷，单独修通用机制，并确认没有加入产品事实。
+7. 不要为换产品修改 `SKILL.md`、`scripts/`、`assets/` 或 `references/`。如果新产品暴露的是通用缺陷，单独修通用机制，并确认没有加入产品事实。
 
 ## 修改后的验证
 
@@ -119,13 +118,13 @@ bun test
 
 - 只改说明：至少跑 `bun run validate`。
 - 改模板、tokens、components、rules 或 QA：跑 `bun run validate && bun test`。
-- 改生成方法、模板语料或 passes：按 `quality-benchmark/README.md` 跑新旧 run 对比。
+- 改生成方法、模板语料或 passes：跑完整测试与真实预览，检查 workflow 生成的浏览器截图。
 - 改预览服务：启动 `bun run preview -- --project-dir <临时目录> --run-label smoke-test`，确认返回 JSON、页面可访问、热更新和退出都正常。
 
 提交前再搜索一次旧路径和越界知识：
 
 ```bash
-rg -n "serve-preview|run-qa-gate|profile/|platforms/" SKILL.md package.json scripts quality-benchmark
+rg -n "serve-preview|run-qa-gate|profile/|platforms/" SKILL.md package.json scripts
 rg -n "旧产品名|旧前缀" . --glob '!profile/**'
 ```
 

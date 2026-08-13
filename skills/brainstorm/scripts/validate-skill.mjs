@@ -15,6 +15,7 @@
  *   5. profile/PROFILE.md screen table matches profile/screens/ on disk (both directions).
  *   6. Root-absolute src/href in screen templates resolve through a server mount.
  *   7. The canonical page scaffold and preview-frame stylesheet keep their contract.
+ *   8. Every profile screen has a valid deterministic workflow contract.
  *
  * Usage: node scripts/validate-skill.mjs [--json] [--profile <dir>]
  */
@@ -58,8 +59,8 @@ if (!fs.existsSync(path.join(ROOT, 'SKILL.md'))) {
   errors.push('缺少根目录 SKILL.md');
 }
 
-// Check 7: shared page-authoring contract. Generated files copy one canonical
-// scaffold, while preview-only frame styles stay in a separate server-linked
+// Check 7: shared page-authoring contract. Deterministic assembly owns one
+// canonical scaffold, while preview-only frame styles stay in a server-linked
 // stylesheet. Keep these responsibilities distinct so SKILL.md cannot drift
 // from an ignored HTML shell inside the style asset.
 const pageTemplatePath = path.join(ROOT, 'assets', 'page-template.html');
@@ -85,6 +86,67 @@ if (!fs.existsSync(pageTemplatePath)) {
   }
   if (/\/assets\/frame\.css|\/assets\/(?:live-reload|annotate)\.js/.test(pageTemplate)) {
     errors.push('assets/page-template.html 不应手动链接预览框架或辅助脚本；这些由服务注入');
+  }
+}
+
+// Check 8: deterministic workflow contracts are mandatory profile data. The
+// generation workflow must not fall back to prose-only invariants.
+const workflowContractsPath = path.join(activeProfileDir, 'quality', 'workflow-contracts.json');
+if (!fs.existsSync(workflowContractsPath)) {
+  errors.push('缺少 profile/quality/workflow-contracts.json');
+} else {
+  let workflowContracts;
+  try {
+    workflowContracts = JSON.parse(fs.readFileSync(workflowContractsPath, 'utf8'));
+  } catch (error) {
+    errors.push(`profile/quality/workflow-contracts.json JSON 无效: ${error.message}`);
+  }
+  if (workflowContracts) {
+    if (workflowContracts.version !== 2 || !workflowContracts.templates || typeof workflowContracts.templates !== 'object') {
+      errors.push('profile/quality/workflow-contracts.json 必须使用 version 2 并包含 templates 对象');
+    } else {
+      const screenNames = fs.existsSync(path.join(activeProfileDir, 'screens'))
+        ? fs.readdirSync(path.join(activeProfileDir, 'screens')).filter((name) => name.endsWith('.html')).sort()
+        : [];
+      for (const name of screenNames) {
+        const contract = workflowContracts.templates[name];
+        if (!contract) {
+          errors.push(`模板缺少 workflow contract: profile/screens/${name}`);
+          continue;
+        }
+        for (const key of ['contextFiles', 'requiredTextPerScreen']) {
+          if (!Array.isArray(contract[key]) || contract[key].some((value) => typeof value !== 'string')) {
+            errors.push(`workflow contract ${name}.${key} 必须是字符串数组`);
+          }
+        }
+        for (const key of ['requiredAssetsPerScreen', 'brandIdentitySelectors', 'diversitySelectors']) {
+          if (contract[key] !== undefined
+            && (!Array.isArray(contract[key]) || contract[key].some((value) => typeof value !== 'string'))) {
+            errors.push(`workflow contract ${name}.${key} 必须是字符串数组`);
+          }
+        }
+        for (const selector of contract.brandIdentitySelectors || []) {
+          if (!/^\.[a-zA-Z_][\w-]*$/.test(selector)) {
+            errors.push(`workflow contract ${name}.brandIdentitySelectors 只能声明简单 class selector: ${selector}`);
+          }
+        }
+        for (const selector of contract.diversitySelectors || []) {
+          if (!/^\.[a-zA-Z_][\w-]*$/.test(selector)) {
+            errors.push(`workflow contract ${name}.diversitySelectors 只能声明简单 class selector: ${selector}`);
+          }
+        }
+        for (const relative of contract.contextFiles || []) {
+          if (path.isAbsolute(relative) || relative.split(/[\\/]/).includes('..')) {
+            errors.push(`workflow contract ${name} 的 contextFiles 越界: ${relative}`);
+          } else if (!fs.existsSync(path.join(activeProfileDir, relative))) {
+            errors.push(`workflow contract ${name} 引用了不存在的 context file: ${relative}`);
+          }
+        }
+      }
+      for (const name of Object.keys(workflowContracts.templates)) {
+        if (!screenNames.includes(name)) errors.push(`workflow contract 引用了不存在的模板: ${name}`);
+      }
+    }
   }
 }
 if (!fs.existsSync(frameStylesheetPath)) {
@@ -147,7 +209,7 @@ addMarkdownDocs(path.join(ROOT, 'profile', 'branches'));
 // A token is a "concrete in-package path" when it starts with a known top-level
 // segment or is a known root file, and carries a file extension (so we skip
 // prose, dirs-as-concepts, and generated-output examples like `home.html`).
-const IN_PKG_PREFIXES = ['assets/', 'profile/', 'platforms/', 'references/', 'tools/', 'scripts/', 'quality-benchmark/'];
+const IN_PKG_PREFIXES = ['assets/', 'profile/', 'platforms/', 'references/', 'tools/', 'scripts/'];
 const ROOT_FILES = new Set(['AGENTS.md', 'README.md', 'SKILL.md', 'package.json']);
 
 // These exact paths describe optional, conditionally-loaded profile mechanisms

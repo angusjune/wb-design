@@ -31,6 +31,7 @@ const {
   resolveRun,
   safeTemplateName,
   selectContext,
+  selectDeclaredContext,
   sha256File,
   solutionScreen,
   solutionQualityReport,
@@ -299,6 +300,10 @@ function prepare(options) {
         bytes: fs.statSync(paths.designContextFile).size,
         sha256: sha256File(paths.designContextFile),
       },
+      ...selectDeclaredContext({
+        profileDir,
+        contextFiles: templateContract.contextFiles || [],
+      }),
     ];
   } else {
     context = selectContext({

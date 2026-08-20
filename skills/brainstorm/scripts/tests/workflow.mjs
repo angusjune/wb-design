@@ -49,6 +49,15 @@ async function stopServer(child) {
 }
 
 const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'brainstorm-workflow-test-'));
+const workspaceProfile = path.join(temporary, 'wb-design-profile');
+fs.cpSync(path.join(BRAINSTORM_DIR, 'profile'), workspaceProfile, { recursive: true });
+const productKnowledgeFile = path.join(workspaceProfile, 'knowledge', 'fund-detail.md');
+fs.mkdirSync(path.dirname(productKnowledgeFile), { recursive: true });
+fs.writeFileSync(productKnowledgeFile, '# Fund detail product knowledge\n\nPreserve the risk acknowledgement.\n');
+const workflowContractsFile = path.join(workspaceProfile, 'quality', 'workflow-contracts.json');
+const workflowContracts = JSON.parse(fs.readFileSync(workflowContractsFile, 'utf8'));
+workflowContracts.templates['基金详情页.html'].contextFiles = ['knowledge/fund-detail.md'];
+fs.writeFileSync(workflowContractsFile, `${JSON.stringify(workflowContracts, null, 2)}\n`);
 const port = 4600 + Math.floor(Math.random() * 200);
 const server = spawn(process.execPath, [
   SERVER,
@@ -75,9 +84,14 @@ try {
   assert.ok(prepared.contextBytes < 20_000, `solutions context was ${prepared.contextBytes} bytes`);
   assert.ok(prepared.contextFiles.every((file) => !file.includes('SKILL.md')));
   assert.equal(fs.realpathSync(prepared.contextFiles[0]), fs.realpathSync(path.join(workflowDir, 'worker-brief.md')));
+  assert.equal(
+    prepared.contextFiles.filter((file) => fs.realpathSync(file) === fs.realpathSync(productKnowledgeFile)).length,
+    1,
+    'rework must include each profile-declared context file exactly once',
+  );
 
   const fragments = path.join(workflowDir, 'fragments');
-  const sourceTemplate = fs.readFileSync(path.join(BRAINSTORM_DIR, 'profile/screens/基金详情页.html'), 'utf8');
+  const sourceTemplate = fs.readFileSync(path.join(info.profileDir, 'screens/基金详情页.html'), 'utf8');
   const sourceParts = (await import('../lib/workflow-contract.cjs')).default.extractTemplateParts(sourceTemplate);
   for (const [index, name] of ['solutions.screen-1.html', 'solutions.screen-2.html', 'solutions.screen-3.html'].entries()) {
     const file = path.join(fragments, name);
@@ -91,6 +105,7 @@ try {
   assert.match(brief, /Edit exactly[^]*solutions\.screen-1\.html/);
   assert.match(brief, /brand identity anchors/i);
   assert.match(brief, /Brand mode: `preserve`/);
+  assert.ok(brief.includes(fs.realpathSync(productKnowledgeFile)));
   assert.ok(fs.existsSync(path.join(fragments, 'solutions.base.css')));
   const captionsFile = path.join(fragments, 'solutions.captions.json');
   const captions = JSON.parse(fs.readFileSync(captionsFile, 'utf8'))
@@ -226,7 +241,9 @@ try {
     info.stateDir,
     'workflow/stages/new-screen-solutions/fragments',
   );
-  assert.ok(composed.contextFiles.some((file) => file.endsWith('/profile/screens/基金详情页.html')));
+  assert.ok(composed.contextFiles.some(
+    (file) => fs.realpathSync(file) === fs.realpathSync(path.join(info.profileDir, 'screens/基金详情页.html')),
+  ));
   assert.match(
     fs.readFileSync(path.join(composeFragments, 'new-screen-solutions.screen-1.html'), 'utf8'),
     /WORKFLOW_SCREEN_1/,
@@ -247,7 +264,9 @@ try {
   const blankContract = JSON.parse(fs.readFileSync(path.join(blankComposeDir, 'generation-contract.json'), 'utf8'));
   assert.equal(blankContract.template, null);
   assert.equal(blankContract.templateSha256, null);
-  assert.ok(blankComposed.contextFiles.some((file) => file.endsWith('/profile/PROFILE.md')));
+  assert.ok(blankComposed.contextFiles.some(
+    (file) => fs.realpathSync(file) === fs.realpathSync(path.join(info.profileDir, 'PROFILE.md')),
+  ));
   for (const [index, name] of [
     'blank-page-solutions.screen-1.html',
     'blank-page-solutions.screen-2.html',

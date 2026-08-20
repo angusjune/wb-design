@@ -1,5 +1,11 @@
 # wb-design
 
+## 1.0.1
+
+### Patch Changes
+
+- Include profile-declared context files in rework workflows.
+
 ## 1.0.0
 
 ### Major Changes

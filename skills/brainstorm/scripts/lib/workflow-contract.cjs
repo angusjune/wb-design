@@ -454,15 +454,8 @@ function solutionQualityFindings(options) {
   return solutionQualityReport(options).findings;
 }
 
-function selectContext({ profileDir, templateFile, skillDir, kind, contextFiles = [] }) {
-  const candidates = [
-    path.join(profileDir, 'PROFILE.md'),
-    path.join(profileDir, 'design-system', 'tokens.css'),
-    path.join(profileDir, 'design-system', 'components.css'),
-    path.join(profileDir, 'quality', 'workflow-contracts.json'),
-  ];
-  if (templateFile) candidates.splice(1, 0, templateFile);
-  if (kind === 'solutions') candidates.push(path.join(skillDir, 'references', 'solution-archetypes.md'));
+function selectDeclaredContext({ profileDir, contextFiles = [] }) {
+  const candidates = [];
   for (const relative of contextFiles) {
     if (typeof relative !== 'string' || path.isAbsolute(relative) || relative.split(/[\\/]/).includes('..')) {
       throw new Error(`invalid profile context file: ${relative}`);
@@ -473,6 +466,19 @@ function selectContext({ profileDir, templateFile, skillDir, kind, contextFiles 
     }
     candidates.push(absolute);
   }
+  return [...new Set(candidates)].map((file) => contextEntry(profileDir, file));
+}
+
+function selectContext({ profileDir, templateFile, skillDir, kind, contextFiles = [] }) {
+  const candidates = [
+    path.join(profileDir, 'PROFILE.md'),
+    path.join(profileDir, 'design-system', 'tokens.css'),
+    path.join(profileDir, 'design-system', 'components.css'),
+    path.join(profileDir, 'quality', 'workflow-contracts.json'),
+  ];
+  if (templateFile) candidates.splice(1, 0, templateFile);
+  if (kind === 'solutions') candidates.push(path.join(skillDir, 'references', 'solution-archetypes.md'));
+  candidates.push(...selectDeclaredContext({ profileDir, contextFiles }).map((entry) => entry.absolute));
   return [...new Set(candidates)].filter((file) => fs.existsSync(file)).map((file) => contextEntry(profileDir, file));
 }
 
@@ -696,6 +702,7 @@ module.exports = {
   safeTemplateName,
   safeStageName,
   selectContext,
+  selectDeclaredContext,
   sha256File,
   screenSegments,
   validateDocument,

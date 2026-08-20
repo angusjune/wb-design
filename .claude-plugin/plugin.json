@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "wb-design",
   "displayName": "WeBank Design",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "微众银行 App 设计工具箱",
   "author": {
     "name": "anguszhu"
